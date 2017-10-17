@@ -8,7 +8,6 @@
     <groupId>ru.otus</groupId>
     <artifactId>hw</artifactId>
     <version>1.0-SNAPSHOT</version>
-
     <packaging>pom</packaging>
 
     <name>all-homeworks</name>
