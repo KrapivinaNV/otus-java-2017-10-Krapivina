@@ -13,11 +13,12 @@ public class ContainerSizeCalculator extends SizeCalculator {
     }
 
     @Override
-    public void populateObjects() {
+    public Object populateObjects() {
         List<String> strings = new ArrayList<>();
         for (int index = 0; index < size; index++) {
             strings.add("");
         }
+        return strings;
     }
 
     @Override
