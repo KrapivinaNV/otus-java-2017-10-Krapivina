@@ -16,12 +16,15 @@
     <modules>
         <module>hw01</module>
         <module>hw02</module>
+        <module>hw03</module>
     </modules>
 
     <properties>
         <guava.version>23.0</guava.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <testng.version>6.10</testng.version>
+        <commons-lang3.version>3.1</commons-lang3.version>
     </properties>
 
     <dependencyManagement>
@@ -30,6 +33,18 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>${testng.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
