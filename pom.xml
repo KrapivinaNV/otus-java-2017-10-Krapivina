@@ -23,8 +23,9 @@
         <guava.version>23.0</guava.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <testng.version>6.10</testng.version>
         <commons-lang3.version>3.1</commons-lang3.version>
+        
+        <testng.version>6.10</testng.version>
     </properties>
 
     <dependencyManagement>

@@ -8,7 +8,7 @@ import java.util.*;
 
 public class MyArrayList<T> implements List<T> {
 
-    private static final int INITIAL_CAPACITY = 3;
+    private static final int INITIAL_CAPACITY = 10;
     private Object[] array;
     private int size;
 
@@ -52,11 +52,7 @@ public class MyArrayList<T> implements List<T> {
 
     @Override
     public Object[] toArray() {
-        Object[] copyArray = new Object[size];
-        for (int index = 0; index < size; index++) {
-            copyArray[index] = array[index];
-        }
-        return copyArray;
+        return Arrays.copyOf(array, size);
     }
 
     @Override
@@ -69,9 +65,11 @@ public class MyArrayList<T> implements List<T> {
         size++;
         int oldCapacity = array.length;
 
+        if (size >= Integer.MAX_VALUE)
+            throw new IllegalStateException("maximum size of array has been reached");
+
         if (size >= oldCapacity) {
             int newCapacity = oldCapacity + (oldCapacity >> 1);
-            // TODO: Ограничение по макс кол-ву
             array = Arrays.copyOf(array, newCapacity);
         }
 
@@ -117,13 +115,18 @@ public class MyArrayList<T> implements List<T> {
     @Override
     @SuppressWarnings("unchecked")
     public T get(int index) {
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("index out of bounds: " + index);
+        }
         return (T) array[index];
-        //TODO: Check for index bounds
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public T set(int index, T element) {
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("index out of bounds: " + index);
+        }
         T oldElement = (T) array[index];
         array[index] = element;
         return oldElement;
