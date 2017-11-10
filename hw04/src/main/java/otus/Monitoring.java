@@ -12,9 +12,9 @@ class Monitoring {
     void installGCMonitoring() {
         List<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
 
-        for (GarbageCollectorMXBean gcbean : garbageCollectorMXBeans) {
-            System.out.println(gcbean.getName());
-            NotificationEmitter emitter = (NotificationEmitter) gcbean;
+        for (GarbageCollectorMXBean mxBean : garbageCollectorMXBeans) {
+            System.out.println(mxBean.getName());
+            NotificationEmitter emitter = (NotificationEmitter) mxBean;
 
             emitter.addNotificationListener(myNotificationListener, null, null);
         }

@@ -43,7 +43,6 @@ GCInfo{duration=3, startTime=202139, endTime=202142, type=YOUNG_GENERATION}
 GCInfo{duration=16, startTime=202142, endTime=202158, type=OLD_GENERATION}
 GCInfo{duration=16, startTime=202158, endTime=202174, type=OLD_GENERATION}
 Count = 13
-Count strings = 1_823_230
 
 
 -XX:+UseParallelGC -XX:-UseParallelOldGC    ++++++
@@ -58,7 +57,6 @@ GCInfo{duration=13, startTime=200458, endTime=200471, type=OLD_GENERATION}
 GCInfo{duration=0, startTime=200471, endTime=200471, type=YOUNG_GENERATION}
 GCInfo{duration=13, startTime=200471, endTime=200484, type=OLD_GENERATION}
 Count = 8
-Count strings = 1_823_230
 
 
 -XX:-UseParNewGC -XX:+UseConcMarkSweepGC +++++
@@ -73,7 +71,6 @@ GCInfo{duration=12, startTime=199806, endTime=199818, type=YOUNG_GENERATION}
 GCInfo{duration=15, startTime=199818, endTime=199833, type=OLD_GENERATION}
 GCInfo{duration=12, startTime=199833, endTime=199845, type=OLD_GENERATION}
 Count = 7
-Count strings = 1_823_230
 
 
 G1	-XX:+UseG1GC +++++
@@ -90,7 +87,6 @@ GCInfo{duration=1, startTime=495348, endTime=495349, type=YOUNG_GENERATION}
 GCInfo{duration=25, startTime=495349, endTime=495374, type=OLD_GENERATION}
 GCInfo{duration=24, startTime=495374, endTime=495398, type=OLD_GENERATION}
 Count = 10
-Count strings = 1_823_230
 */
 
 import java.util.ArrayList;
@@ -101,6 +97,7 @@ public class Starter {
     public static void main(String[] args) throws InterruptedException {
         Monitoring monitoring = new Monitoring();
         monitoring.installGCMonitoring();
+
         List<String> strings = new ArrayList<>();
         int size = 50_000_000;
 
@@ -118,7 +115,6 @@ public class Starter {
                 System.out.println(gcInfo.toString());
             }
             System.out.println("Count = " + monitoring.getMyNotificationListener().getGcInfos().size());
-            System.out.println("Count strings = " + strings.size());
         }
     }
 }

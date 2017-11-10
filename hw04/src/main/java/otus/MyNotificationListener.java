@@ -29,7 +29,7 @@ public class MyNotificationListener implements NotificationListener {
                     gcInfos.add(new GCInfo(TypeGeneration.OLD_GENERATION, info.getGcInfo().getDuration(), info.getGcInfo().getStartTime(), info.getGcInfo().getEndTime()));
                     break;
                 default:
-                    throw new IllegalStateException("illegal gcType;");
+                    throw new IllegalStateException("illegal gcType;" + info.getGcAction());
             }
         }
     }
