@@ -1,5 +1,6 @@
 package otus;
 
+import com.google.common.collect.ImmutableList;
 import com.sun.management.GarbageCollectionNotificationInfo;
 
 import javax.management.Notification;
@@ -13,7 +14,7 @@ public class MyNotificationListener implements NotificationListener {
     private static final String END_OF_MINOR_GC = "end of minor GC";
     private static final String END_OF_MAJOR_GC = "end of major GC";
 
-    private List<GCInfo> gcInfos = new ArrayList<>();
+    private final List<GCInfo> gcInfos = new ArrayList<>();
 
     @Override
     public void handleNotification(Notification notification, Object handback) {
@@ -35,6 +36,6 @@ public class MyNotificationListener implements NotificationListener {
     }
 
     List<GCInfo> getGcInfos() {
-        return gcInfos;
+        return ImmutableList.copyOf(gcInfos);
     }
 }

@@ -91,12 +91,23 @@ Count = 10
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Starter {
 
     public static void main(String[] args) throws InterruptedException {
         Monitoring monitoring = new Monitoring();
         monitoring.installGCMonitoring();
+
+        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+        executorService.scheduleWithFixedDelay(
+                () -> infoShowResult(monitoring),
+                1,
+                1,
+                TimeUnit.MINUTES
+        );
 
         List<String> strings = new ArrayList<>();
         int size = 50_000_000;
@@ -111,10 +122,18 @@ public class Starter {
                 strings.remove(0);
             }
         } catch (OutOfMemoryError outOfMemoryError) {
-            for (GCInfo gcInfo : monitoring.getMyNotificationListener().getGcInfos()) {
-                System.out.println(gcInfo.toString());
-            }
-            System.out.println("Count = " + monitoring.getMyNotificationListener().getGcInfos().size());
+            infoShowResult(monitoring);
+
+            executorService.awaitTermination(100, TimeUnit.MILLISECONDS);
+            executorService.shutdown();
         }
+    }
+
+    private static void infoShowResult(Monitoring monitoring) {
+        List<GCInfo> gcInfos = monitoring.getMyNotificationListener().getGcInfos();
+        for (GCInfo gcInfo : gcInfos) {
+            System.out.println(gcInfo.toString());
+        }
+        System.out.println("Count = " + gcInfos.size());
     }
 }
