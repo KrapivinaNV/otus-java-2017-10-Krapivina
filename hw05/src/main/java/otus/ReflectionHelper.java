@@ -13,9 +13,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * Created by tully.
- */
 @SuppressWarnings("SameParameterValue")
 class ReflectionHelper {
     private ReflectionHelper() {
@@ -87,28 +84,6 @@ class ReflectionHelper {
         return null;
     }
 
-//    static <T> Object getMethodAnnotations(Class<T> type, String name, Object ... args){
-//        Method method = null;
-//        boolean isAccessible = true;
-//        try {
-//            method = type.getDeclaredMethod(name, toClasses(args));
-//            isAccessible = method.isAccessible();
-//            method.setAccessible(true);
-//
-//            return method.getDeclaredAnnotations();
-//        } catch ( NoSuchMethodException  e) {
-//            e.printStackTrace();
-//        } finally {
-//            if (method != null && !isAccessible) {
-//                method.setAccessible(false);
-//            }
-//        }
-//
-//
-//        return null;
-//    }
-
-
     static <T> List<Method> getMethodsByAnnotation(Class<T> type, Class<? extends Annotation> annotation) {
         Method[] methods;
         List<Method> methodsWithAnnotation = new ArrayList<>();
@@ -116,7 +91,6 @@ class ReflectionHelper {
         methods = type.getDeclaredMethods();
 
         for (Method method : methods) {
-
             if (method.getAnnotation(annotation) != null) {
                 methodsWithAnnotation.add(method);
             }
@@ -124,30 +98,19 @@ class ReflectionHelper {
         return methodsWithAnnotation;
     }
 
-    static Set<Class<? extends Object>> getClassesByPackage(String tPackage) {
+    static Set<Class<?>> getClassesByPackage(String tPackage) {
         Reflections reflections = new Reflections(tPackage, new SubTypesScanner(false));
         return reflections.getSubTypesOf(Object.class);
     }
 
-
-    static <T> boolean isMethodsWithAnnotation(Class<T> type, Class<? extends Annotation> annotation) {
-
-        Method[] methods;
-        List<Method> methodsWithAnnotation = new ArrayList<>();
-
-        methods = type.getDeclaredMethods();
-
-        for (Method method : methods) {
+    static <T> boolean hasMethodAnnotation(Class<T> type, Class<? extends Annotation> annotation) {
+        for (Method method : type.getDeclaredMethods()) {
             if (method.getAnnotation(annotation) != null) {
-                methodsWithAnnotation.add(method);
                 return true;
             }
         }
         return false;
-
-
     }
-
 
     static private Class<?>[] toClasses(Object[] args) {
         if (args == null) {

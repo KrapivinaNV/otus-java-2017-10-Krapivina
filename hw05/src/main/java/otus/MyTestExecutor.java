@@ -8,17 +8,16 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
-public class MyTestExecutor {
+class MyTestExecutor {
 
     @SuppressWarnings("ConfusingArgumentToVarargsMethod")
-    public static <T> void invoke(Class<T> type) {
+    static <T> void invoke(Class<T> type) {
+        System.out.println(type.getName() + ":");
 
         List<Method> testMethods = ReflectionHelper.getMethodsByAnnotation(type, Test.class);
 
         for (Method testMethod : testMethods) {
-
-            MyTest myTest = ReflectionHelper.instantiate(MyTest.class);
-
+            T myTest = ReflectionHelper.instantiate(type);
             List<Method> beforeMethods = ReflectionHelper.getMethodsByAnnotation(type, Before.class);
             for (Method beforeMethod : beforeMethods) {
                 ReflectionHelper.callMethod(myTest, beforeMethod.getName(), beforeMethod.getTypeParameters());
@@ -30,24 +29,18 @@ public class MyTestExecutor {
             for (Method afterMethod : afterMethods) {
                 ReflectionHelper.callMethod(myTest, afterMethod.getName(), afterMethod.getTypeParameters());
             }
-
         }
-
     }
 
     @SuppressWarnings("unchecked")
-    public static void invoke(String tPackage) {
+    static void invoke(String packageToScan) {
 
-        Set<Class<?>> classes = ReflectionHelper.getClassesByPackage(tPackage);
-
+        Set<Class<?>> classes = ReflectionHelper.getClassesByPackage(packageToScan);
         for (Class myClass : classes) {
-
-            if (ReflectionHelper.isMethodsWithAnnotation(myClass, Test.class)) {
-                System.out.println(myClass.getName() + ":");
+            if (ReflectionHelper.hasMethodAnnotation(myClass, Test.class)) {
                 invoke(myClass);
                 System.out.println();
             }
-
         }
     }
 }
