@@ -75,7 +75,7 @@ class ReflectionHelper {
             method.setAccessible(true);
             return method.invoke(object, args);
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
         } finally {
             if (method != null && !isAccessible) {
                 method.setAccessible(false);

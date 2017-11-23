@@ -43,11 +43,6 @@ public class MyTest {
     }
 
 
-    @Test
-    private void test3() {
-        System.out.println("Test 3");
-    }
-
     @After
     public void tearDown1() {
         System.out.println("After 1");
