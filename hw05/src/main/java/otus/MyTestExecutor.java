@@ -15,17 +15,18 @@ class MyTestExecutor {
         System.out.println(type.getName() + ":");
 
         List<Method> testMethods = ReflectionHelper.getMethodsByAnnotation(type, Test.class);
+        List<Method> beforeMethods = ReflectionHelper.getMethodsByAnnotation(type, Before.class);
+        List<Method> afterMethods = ReflectionHelper.getMethodsByAnnotation(type, After.class);
 
         for (Method testMethod : testMethods) {
             T myTest = ReflectionHelper.instantiate(type);
-            List<Method> beforeMethods = ReflectionHelper.getMethodsByAnnotation(type, Before.class);
+
             for (Method beforeMethod : beforeMethods) {
                 ReflectionHelper.callMethod(myTest, beforeMethod.getName(), beforeMethod.getTypeParameters());
             }
 
             ReflectionHelper.callMethod(myTest, testMethod.getName(), testMethod.getTypeParameters());
 
-            List<Method> afterMethods = ReflectionHelper.getMethodsByAnnotation(type, After.class);
             for (Method afterMethod : afterMethods) {
                 ReflectionHelper.callMethod(myTest, afterMethod.getName(), afterMethod.getTypeParameters());
             }
