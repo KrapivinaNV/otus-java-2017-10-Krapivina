@@ -1,4 +1,4 @@
-package otus.exeptions;
+package otus.exceptions;
 
 public class MyAssertionError extends RuntimeException {
 }

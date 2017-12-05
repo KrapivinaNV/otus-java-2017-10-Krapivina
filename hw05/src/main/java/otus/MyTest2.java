@@ -3,7 +3,6 @@ package otus;
 import com.google.common.collect.Lists;
 import otus.annotations.After;
 import otus.annotations.Test;
-import otus.exeptions.MyAssertionError;
 
 import java.util.List;
 
