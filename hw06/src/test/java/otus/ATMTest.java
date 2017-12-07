@@ -7,7 +7,6 @@ import org.testng.annotations.Test;
 import otus.exceptions.MyExceptions.NoSuitableNotesException;
 
 import java.util.Map;
-import java.util.Set;
 
 import static org.testng.Assert.assertEquals;
 import static otus.exceptions.MyExceptions.NotEnoughMoneyExeption;
@@ -16,8 +15,7 @@ public class ATMTest {
 
     @Test(dataProvider = "withdrawDataProvider")
     public void withdraw(Map<Nominal, Long> initCells, long withdrawSum, Map<Nominal, Long> expected) {
-        BankingOperationsAware atm = new ATM();
-        atm.initATM(initCells);
+        BankingOperationsAware atm = createATM(initCells);
         Map<Nominal, Long> withdrawResult = atm.withdraw(withdrawSum);
 
         assertEquals(expected, withdrawResult);
@@ -41,26 +39,23 @@ public class ATMTest {
 
     @Test(expectedExceptions = NoSuitableNotesException.class)
     public void withdrawNoSuitableNotes() {
-        ATM atm = new ATM();
-        atm.initATM(ImmutableMap.of(Nominal.FIVE_THOUSANDTH, 0L, Nominal.HUNDREDS, 2L, Nominal.THOUSANDS, 50L));
+        BankingOperationsAware atm = createATM(ImmutableMap.of(Nominal.FIVE_THOUSANDTH, 0L, Nominal.HUNDREDS, 2L, Nominal.THOUSANDS, 50L));
         Map<Nominal, Long> withdrawResult = atm.withdraw(1300);
     }
 
     @Test(expectedExceptions = NotEnoughMoneyExeption.class)
     public void withdrawNotEnoughtMoney() {
-        ATM atm = new ATM();
-        atm.initATM(ImmutableMap.of(Nominal.FIVE_THOUSANDTH, 0L, Nominal.HUNDREDS, 10L, Nominal.THOUSANDS, 50L));
+        BankingOperationsAware atm = createATM(ImmutableMap.of(Nominal.FIVE_THOUSANDTH, 0L, Nominal.HUNDREDS, 10L, Nominal.THOUSANDS, 50L));
         Map<Nominal, Long> withdrawResult = atm.withdraw(110000);
     }
 
 
     @Test(dataProvider = "depositDataProvider")
-    public void deposit(Map<Nominal, Long> initCells, Map<Nominal, Long> deposit, Set<Cell> expected) {
-        ATM atm = new ATM();
-        atm.initATM(initCells);
+    public void deposit(Map<Nominal, Long> initCells, Map<Nominal, Long> deposit, BankingOperationsAware expected) {
+        BankingOperationsAware atm = createATM(initCells);
         atm.deposit(deposit);
 
-        assertEquals(expected, atm.getCells());
+        assertEquals(expected, atm);
     }
 
     @DataProvider
@@ -69,27 +64,37 @@ public class ATMTest {
                 {
                         ImmutableMap.of(Nominal.FIVE_THOUSANDTH, 1L, Nominal.HUNDREDS, 10L, Nominal.THOUSANDS, 50L),
                         ImmutableMap.of(Nominal.FIVE_THOUSANDTH, 1L, Nominal.HUNDREDS, 1L),
-                        ImmutableSet.of(new Cell(Nominal.FIVE_THOUSANDTH, 2L), new Cell(Nominal.HUNDREDS, 11L), new Cell(Nominal.THOUSANDS, 50L))
+                        createATM(
+                                ImmutableMap.of(Nominal.FIVE_THOUSANDTH, 2L, Nominal.HUNDREDS, 11L, Nominal.THOUSANDS, 50L)
+                        ),
                 },
                 {
                         ImmutableMap.of(Nominal.FIVE_THOUSANDTH, 1L, Nominal.HUNDREDS, 10L, Nominal.THOUSANDS, 50L),
                         ImmutableMap.of(Nominal.FIVE_THOUSANDTH, 10L, Nominal.HUNDREDS, 10L, Nominal.THOUSANDS, 50L),
-                        ImmutableSet.of(new Cell(Nominal.FIVE_THOUSANDTH, 11L), new Cell(Nominal.HUNDREDS, 20L), new Cell(Nominal.THOUSANDS, 100L))
+                        createATM(
+                                ImmutableMap.of(Nominal.FIVE_THOUSANDTH, 11L, Nominal.HUNDREDS, 20L, Nominal.THOUSANDS, 100L)
+                        ),
                 },
                 {
                         ImmutableMap.of(Nominal.FIVE_THOUSANDTH, 1L, Nominal.HUNDREDS, 10L, Nominal.THOUSANDS, 50L),
                         ImmutableMap.of(),
-                        ImmutableSet.of(new Cell(Nominal.FIVE_THOUSANDTH, 1L), new Cell(Nominal.HUNDREDS, 10L), new Cell(Nominal.THOUSANDS, 50L))
+                        createATM(
+                                ImmutableMap.of(Nominal.FIVE_THOUSANDTH, 1L, Nominal.HUNDREDS, 10L, Nominal.THOUSANDS, 50L)
+                        ),
                 },
                 {
                         ImmutableMap.of(),
                         ImmutableMap.of(),
-                        ImmutableSet.of(new Cell(Nominal.FIVE_THOUSANDTH, 0L), new Cell(Nominal.HUNDREDS, 0L), new Cell(Nominal.THOUSANDS, 0L))
+                        createATM(
+                                ImmutableMap.of(Nominal.FIVE_THOUSANDTH, 0L, Nominal.HUNDREDS, 0L, Nominal.THOUSANDS, 0L)
+                        ),
                 },
                 {
                         ImmutableMap.of(),
                         ImmutableMap.of(Nominal.FIVE_THOUSANDTH, 1L, Nominal.HUNDREDS, 10L, Nominal.THOUSANDS, 50L),
-                        ImmutableSet.of(new Cell(Nominal.FIVE_THOUSANDTH, 1L), new Cell(Nominal.HUNDREDS, 10L), new Cell(Nominal.THOUSANDS, 50L))
+                        createATM(
+                                ImmutableMap.of(Nominal.FIVE_THOUSANDTH, 1L, Nominal.HUNDREDS, 10L, Nominal.THOUSANDS, 50L)
+                        ),
                 },
 
         };
@@ -97,16 +102,13 @@ public class ATMTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void depositError() {
-        ATM atm = new ATM();
-        atm.initATM(ImmutableMap.of());
+        BankingOperationsAware atm = createATM(ImmutableMap.of());
         atm.deposit(null);
     }
 
     @Test(dataProvider = "getBalanceDataProvider")
     public void getBalance(Map<Nominal, Long> initCells, long expected) {
-        ATM atm = new ATM();
-        atm.initATM(initCells);
-
+        BankingOperationsAware atm = createATM(initCells);
         assertEquals(Long.valueOf(expected), atm.getBalance());
     }
 
@@ -127,9 +129,12 @@ public class ATMTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void atmInitError() {
-        ATM atm = new ATM();
-        atm.initATM(null);
+        BankingOperationsAware atm = createATM(null);
     }
 
-
+    private BankingOperationsAware createATM(Map<Nominal, Long> initCells) {
+        BankingOperationsAware atm = new ATM();
+        atm.initATM(initCells);
+        return atm;
+    }
 }

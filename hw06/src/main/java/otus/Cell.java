@@ -1,24 +1,24 @@
 package otus;
 
 import com.google.common.base.Objects;
-import com.sun.org.apache.xpath.internal.operations.Equals;
+import org.jetbrains.annotations.NotNull;
 
 public class Cell implements Comparable<Cell> {
-    Nominal nominal;
-    long count;
+    private Nominal nominal;
+    private long count;
 
 
-    public Cell(Nominal nominal, Long count) {
+    Cell(Nominal nominal, Long count) {
         this.nominal = nominal;
         this.count = count;
     }
 
-    public void refreshCount(Long newCount){
+    void refreshCount(Long newCount){
         this.count = newCount;
     }
 
 
-    public void deposit(Long countToWithdraw) {
+    void deposit(Long countToWithdraw) {
         this.count += countToWithdraw;
     }
 
@@ -30,20 +30,20 @@ public class Cell implements Comparable<Cell> {
         this.count = result;
     }
 
-    public long getCount() {
+    long getCount() {
         return count;
     }
 
-    public Nominal getNominal() {
+    Nominal getNominal() {
         return nominal;
     }
 
-    public long getCellBalance() {
+    long getCellBalance() {
         return nominal.getNote() * count;
     }
 
     @Override
-    public int compareTo(Cell other) {
+    public int compareTo(@NotNull Cell other) {
         return Long.compare( this.nominal.getNote(), other.nominal.getNote());
     }
 
