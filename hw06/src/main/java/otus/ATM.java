@@ -1,5 +1,6 @@
 package otus;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.TestOnly;
 import otus.exceptions.MyExceptions.NotEnoughMoneyExeption;
@@ -54,10 +55,11 @@ class ATM implements BankingOperationsAware {
         Map<Nominal, Long> resultMap = new HashMap<>();
         for (Cell cell : cells) {
             if ((cell.getCount() != 0) && (sum >= cell.getNominal().getNote())) {
-                long cellCount = Math.min(Math.round(sum / cell.getNominal().getNote()), cell.getCount());
-                if (cellCount != 0) {
-                    resultMap.put(cell.getNominal(), cellCount);
-                    sum -= cellCount * cell.getNominal().getNote();
+                long withdrawCount = Math.min(Math.round(sum / cell.getNominal().getNote()), cell.getCount());
+                if (withdrawCount != 0) {
+                    resultMap.put(cell.getNominal(), withdrawCount);
+                    sum -= withdrawCount * cell.getNominal().getNote();
+                    cell.refreshCount(cell.getCount() - withdrawCount);
                 }
             }
         }
@@ -72,11 +74,42 @@ class ATM implements BankingOperationsAware {
         return cells.stream().mapToLong(Cell::getCellBalance).sum();
     }
 
-    @TestOnly
-    Set<Cell> getCells() {
-        Set<Cell> cells = new TreeSet<>(Comparator.reverseOrder());
-        cells.addAll(this.cells);
+    @Override
+    public InitialATMState saveState() {
+        return new InitialATMState(this, cells);
+    }
 
-        return cells;
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        ATM atm = (ATM) object;
+        return Objects.equal(cells, atm.cells);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(cells);
+    }
+
+    void setCells(Set<Cell> cells) {
+        this.cells = cells;
+    }
+
+
+    static class InitialATMState {
+
+        private Set<Cell> cells;
+        private ATM atm;
+
+        InitialATMState(ATM atm, Set<Cell> cells) {
+            this.atm = atm;
+            this.cells = cells;
+
+        }
+
+        void restore() {
+            atm.setCells(this.cells);
+        }
     }
 }
