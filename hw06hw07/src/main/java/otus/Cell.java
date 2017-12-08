@@ -1,7 +1,6 @@
 package otus;
 
 import com.google.common.base.Objects;
-import org.jetbrains.annotations.NotNull;
 
 public class Cell implements Comparable<Cell> {
     private Nominal nominal;
@@ -43,7 +42,7 @@ public class Cell implements Comparable<Cell> {
     }
 
     @Override
-    public int compareTo(@NotNull Cell other) {
+    public int compareTo(Cell other) {
         return Long.compare( this.nominal.getNote(), other.nominal.getNote());
     }
 
