@@ -1,18 +1,19 @@
-package otus;
+package otus.atm;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import otus.exceptions.MyExceptions.NotEnoughMoneyExeption;
+import otus.atm.exceptions.MyExceptions.NotEnoughMoneyExeption;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static otus.exceptions.MyExceptions.CellNotFoundException;
-import static otus.exceptions.MyExceptions.NoSuitableNotesException;
+import static otus.atm.exceptions.MyExceptions.CellNotFoundException;
+import static otus.atm.exceptions.MyExceptions.NoSuitableNotesException;
 
 class ATM implements BankingOperationsAware {
 
     private Set<Cell> cells;
+    private InitialATMState initialATMState;
 
     ATM() {
         cells = new TreeSet<>(Comparator.reverseOrder());
@@ -22,15 +23,15 @@ class ATM implements BankingOperationsAware {
     @Override
     public void initATM(Map<Nominal, Long> listCells) {
         Preconditions.checkNotNull(listCells);
-
         listCells.forEach((Nominal nominal, Long amount) -> {
-                    cells.stream()
+            cells.stream()
                             .filter(cell -> cell.getNominal().equals(nominal))
                             .findAny()
                             .orElseThrow(CellNotFoundException::new)
                             .refreshCount(amount);
                 }
         );
+        this.initialATMState = new InitialATMState(this.cells);
     }
 
     @Override
@@ -73,9 +74,10 @@ class ATM implements BankingOperationsAware {
         return cells.stream().mapToLong(Cell::getCellBalance).sum();
     }
 
+
     @Override
-    public InitialATMState saveState() {
-        return new InitialATMState(this, cells);
+    public void restoreState() {
+        this.cells = initialATMState.getState();
     }
 
     @Override
@@ -89,26 +91,5 @@ class ATM implements BankingOperationsAware {
     @Override
     public int hashCode() {
         return Objects.hashCode(cells);
-    }
-
-    void setCells(Set<Cell> cells) {
-        this.cells = cells;
-    }
-
-
-    static class InitialATMState {
-
-        private Set<Cell> cells;
-        private ATM atm;
-
-        InitialATMState(ATM atm, Set<Cell> cells) {
-            this.atm = atm;
-            this.cells = cells;
-
-        }
-
-        void restore() {
-            atm.setCells(this.cells);
-        }
     }
 }

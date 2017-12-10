@@ -1,6 +1,6 @@
-package otus;
+package otus.mytest;
 
-import otus.exceptions.MyAssertionError;
+import otus.mytest.myexceptions.MyAssertionError;
 
 public class MyAssert {
 

@@ -1,4 +1,4 @@
-package otus;
+package otus.atm;
 
 import com.google.common.base.Objects;
 
@@ -46,14 +46,11 @@ public class Cell implements Comparable<Cell> {
         return Long.compare( this.nominal.getNote(), other.nominal.getNote());
     }
 
+
     @Override
     public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-        if (object == null || getClass() != object.getClass()) {
-            return false;
-        }
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
         Cell cell = (Cell) object;
         return count == cell.count &&
                 nominal == cell.nominal;

@@ -1,4 +1,4 @@
-package otus;
+package otus.mytest;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;

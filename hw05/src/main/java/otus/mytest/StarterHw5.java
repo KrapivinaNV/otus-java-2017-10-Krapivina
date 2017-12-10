@@ -1,4 +1,4 @@
-package otus;
+package otus.mytest;
 
 public class StarterHw5 {
     public static void main(String[] args) {

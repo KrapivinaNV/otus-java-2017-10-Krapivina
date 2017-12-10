@@ -1,14 +1,14 @@
-package otus;
+package otus.atm;
 
 import com.google.common.collect.ImmutableMap;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import otus.exceptions.MyExceptions.NoSuitableNotesException;
+import otus.atm.exceptions.MyExceptions.NoSuitableNotesException;
 
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
-import static otus.exceptions.MyExceptions.NotEnoughMoneyExeption;
+import static otus.atm.exceptions.MyExceptions.NotEnoughMoneyExeption;
 
 public class ATMTest {
 

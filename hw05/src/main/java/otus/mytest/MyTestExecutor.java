@@ -1,8 +1,8 @@
-package otus;
+package otus.mytest;
 
-import otus.annotations.After;
-import otus.annotations.Before;
-import otus.annotations.Test;
+import otus.mytest.annotations.After;
+import otus.mytest.annotations.Before;
+import otus.mytest.annotations.Test;
 
 import java.lang.reflect.Method;
 import java.util.List;

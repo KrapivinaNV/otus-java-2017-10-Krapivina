@@ -29,6 +29,7 @@
         <commons-lang3.version>3.1</commons-lang3.version>
         
         <testng.version>6.10</testng.version>
+        <reflections.version>0.9.11</reflections.version>
     </properties>
 
     <dependencyManagement>
@@ -43,7 +44,11 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons-lang3.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>${reflections.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>

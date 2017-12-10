@@ -1,4 +1,4 @@
-package otus;
+package otus.atm;
 
 enum Nominal {
     HUNDREDS(100),
