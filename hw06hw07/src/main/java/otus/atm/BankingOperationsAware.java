@@ -1,4 +1,4 @@
-package otus;
+package otus.atm;
 
 import java.util.Map;
 
@@ -12,5 +12,5 @@ public interface BankingOperationsAware {
 
     Long getBalance();
 
-    ATM.InitialATMState saveState();
+    void restoreState();
 }

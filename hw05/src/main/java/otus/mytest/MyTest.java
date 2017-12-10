@@ -1,9 +1,9 @@
-package otus;
+package otus.mytest;
 
 import com.google.common.collect.Lists;
-import otus.annotations.After;
-import otus.annotations.Before;
-import otus.annotations.Test;
+import otus.mytest.annotations.After;
+import otus.mytest.annotations.Before;
+import otus.mytest.annotations.Test;
 
 import java.util.List;
 

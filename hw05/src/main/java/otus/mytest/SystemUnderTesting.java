@@ -1,4 +1,4 @@
-package otus;
+package otus.mytest;
 
 import java.util.ArrayList;
 import java.util.Collections;
