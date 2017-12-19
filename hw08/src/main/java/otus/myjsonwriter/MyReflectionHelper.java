@@ -13,8 +13,7 @@ class MyReflectionHelper {
     }
 
     static Field[] getFields(Object object) {
-        Field[] fields = object.getClass().getDeclaredFields();
-        return fields;
+        return object.getClass().getDeclaredFields();
 
     }
 
@@ -36,7 +35,6 @@ class MyReflectionHelper {
         return null;
     }
 
-
     static Object getFieldValue(Object object, String name) {
         Field field = null;
         boolean isAccessible = true;
@@ -55,14 +53,12 @@ class MyReflectionHelper {
         return null;
     }
 
-
     private static Class<?>[] toClasses(Object[] args) {
         if (args == null) {
             return null;
         } else {
-            List<Class<?>> classes = (List)Arrays.stream(args).map(Object::getClass).collect(Collectors.toList());
+            List<Class<?>> classes = Arrays.stream(args).map(Object::getClass).collect(Collectors.toList());
             return (Class[])classes.toArray(new Class[classes.size()]);
         }
     }
-
 }
