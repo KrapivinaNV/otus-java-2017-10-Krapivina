@@ -8,25 +8,20 @@ public class UserDataSet extends DataSet {
         setId(id);
     }
 
-
-    public UserDataSet(long id, String name, Number age) {
-        setId(id);
-
+    UserDataSet(String name, Number age) {
         this.name = name;
         this.age = age;
     }
 
-    public String getName() {
-        return this.name;
+    public void setId(long id){
+        super.setId(id);
     }
 
-    public Number getAge() {
-        return this.age;
-    }
 
     @Override
     public String toString() {
         return "UserDataSet{" +
+                "id=" + getId() +
                 "name='" + name + '\'' +
                 ", age=" + age +
                 '}';

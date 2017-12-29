@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("SameParameterValue")
-public class MySimpleReflectionHelper {
+class MySimpleReflectionHelper {
 
     static Field[] getFields(Object object) {
         return object.getClass().getDeclaredFields();
