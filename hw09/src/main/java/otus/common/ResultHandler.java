@@ -1,4 +1,4 @@
-package otus.myorm;
+package otus.common;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -7,9 +7,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-class ConnectionHelper {
+public class ConnectionHelper {
 
-    static Connection getConnection() {
+    public static Connection getConnection() {
         try {
             DriverManager.registerDriver(new Driver());
 

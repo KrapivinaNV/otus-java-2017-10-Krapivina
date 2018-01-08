@@ -1,15 +1,25 @@
 package otus.myorm;
 
 import java.lang.reflect.Field;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
+import otus.common.ResultHandler;
+import otus.data.DataSet;
 
-class Executor {
+public class UsersDAO {
 
-    private static final Connection CONNECTION = ConnectionHelper.getConnection();
+    private Connection connection;
 
-    static <T extends DataSet> void save(T user) throws SQLException {
+    public UsersDAO(Connection connection) {
+        this.connection = connection;
+    }
+
+    public <T extends DataSet> void save(T user) throws SQLException {
         StringBuilder createIfNotExistsString = new StringBuilder();
         StringBuilder insertEndString = new StringBuilder();
         StringBuilder insertString = new StringBuilder();
@@ -57,7 +67,7 @@ class Executor {
         execQuery(insertString.toString(), null);
     }
 
-    static <T extends DataSet> T load(long id, Class<T> clazz) throws SQLException {
+    public <T extends DataSet> T load(long id, Class<T> clazz) throws SQLException {
         ResultHandlerGetUser resultHandlerGetUser = new ResultHandlerGetUser();
         execQuery("select * from " + clazz.getSimpleName() + " where id=" + id, resultHandlerGetUser);
         Map<String, String> result = resultHandlerGetUser.getResultMap();
@@ -83,9 +93,9 @@ class Executor {
         return instantiate;
     }
 
-    private static void execQuery(String query, ResultHandler handler) throws SQLException {
+    private void execQuery(String query, ResultHandler handler) throws SQLException {
         System.out.println(query);
-        try (Statement stat = CONNECTION.createStatement()) {
+        try (Statement stat = connection.createStatement()) {
             stat.execute(query);
             ResultSet result = stat.getResultSet();
             if (handler != null) {
@@ -98,7 +108,8 @@ class Executor {
         }
     }
 
-    private static class ResultHandlerGetUser implements ResultHandler {
+    private class ResultHandlerGetUser implements ResultHandler {
+
         private Map<String, String> resultMap = new HashMap<>();
 
         Map<String, String> getResultMap() {
@@ -116,6 +127,7 @@ class Executor {
     }
 
     private static class ResultHandlerGetId implements ResultHandler {
+
         private long id;
 
         public void handle(ResultSet result) throws SQLException {
@@ -123,4 +135,5 @@ class Executor {
             id = result.getLong(result.getMetaData().getColumnLabel(1));
         }
     }
+
 }
