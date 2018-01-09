@@ -10,8 +10,13 @@ import java.util.stream.Collectors;
 @SuppressWarnings("SameParameterValue")
 class MySimpleReflectionHelper {
 
-    static Field[] getFields(Object object) {
+    static Field[] getFieldsByObject(Object object) {
         return object.getClass().getDeclaredFields();
+
+    }
+
+    static Field[] getFieldsByClass(Class clazz) {
+        return clazz.getDeclaredFields();
 
     }
 

@@ -1,20 +1,18 @@
 package otus.data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import org.hibernate.annotations.Type;
+
+import javax.persistence.*;
+import java.util.Set;
 
 @Entity
-@Table(name = "users")
+@Table(name = "user")
 public class UserDataSet extends DataSet {
 
     private String name;
     private Number age;
-    // private AddressDataSet address;
-    // private PhoneDataSet[] phone;
+    private AddressDataSet address;
+    //private Set<PhoneDataSet> phones;
 
     public UserDataSet() {
     }
@@ -23,6 +21,18 @@ public class UserDataSet extends DataSet {
         setId(id);
     }
 
+    public UserDataSet(String name, Number age, AddressDataSet address, Set<PhoneDataSet> phones) {
+        this.name = name;
+        this.age = age;
+        this.address = address;
+        //this.phones = phones;
+    }
+
+    public UserDataSet(String name, Number age, AddressDataSet address) {
+        this.name = name;
+        this.age = age;
+        this.address = address;
+    }
     public UserDataSet(String name, Number age) {
         this.name = name;
         this.age = age;
@@ -47,7 +57,8 @@ public class UserDataSet extends DataSet {
         this.name = name;
     }
 
-    @Column(name = "age")
+    @Column(name = "age", nullable = false)
+    @Type(type = "java.lang.Integer")
     public Number getAge() {
         return age;
     }
@@ -56,12 +67,31 @@ public class UserDataSet extends DataSet {
         this.age = age;
     }
 
+    @OneToOne(cascade = CascadeType.ALL)
+    public AddressDataSet getAddress() {
+        return address;
+    }
+
+   // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+   // public Set<PhoneDataSet> getPhones() {
+   //     return phones;
+   // }
+
+    public void setAddress(AddressDataSet address) {
+        this.address = address;
+    }
+
+   // public void setPhones(Set<PhoneDataSet> phones) {
+    //    this.phones = phones;
+    //}
+
     @Override
     public String toString() {
         return "UserDataSet{" +
-                "id=" + getId() +
-                ", name='" + name + '\'' +
+                "name='" + name + '\'' +
                 ", age=" + age +
+                ", address=" + address +
+               // ", phones=" + phones +
                 '}';
     }
 }

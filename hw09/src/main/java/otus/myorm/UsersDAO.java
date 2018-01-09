@@ -1,15 +1,11 @@
 package otus.myorm;
 
+import otus.data.DataSet;
+
 import java.lang.reflect.Field;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
-import otus.common.ResultHandler;
-import otus.data.DataSet;
 
 public class UsersDAO {
 
@@ -19,52 +15,79 @@ public class UsersDAO {
         this.connection = connection;
     }
 
-    public <T extends DataSet> void save(T user) throws SQLException {
+    <T extends DataSet> void prepareTables(Class<T> myClazz) throws SQLException {
         StringBuilder createIfNotExistsString = new StringBuilder();
-        StringBuilder insertEndString = new StringBuilder();
-        StringBuilder insertString = new StringBuilder();
-
-        String className = user.getClass().getSimpleName();
-        Field[] fields = MySimpleReflectionHelper.getFields(user);
+        StringBuilder alterTableString = new StringBuilder();
 
         createIfNotExistsString.append("create table if not exists ")
-                .append(className)
-                .append("(id bigint(20) default id_seq.nextval not null");
+                .append(myClazz.getSimpleName())
+                .append("(id bigint(20) NOT NULL auto_increment");
 
-        for (Field field : fields) {
-            String fieldName = field.getName();
-            Object fieldValue = MySimpleReflectionHelper.getFieldValue(user, fieldName);
+        for (Field field : MySimpleReflectionHelper.getFieldsByClass(myClazz)) {
+            String fieldName;
             Class<?> clazz = field.getType();
             String typeToString = "";
-            String valueToString = "";
             if (clazz.equals(String.class)) {
                 typeToString = "varchar(255)";
-                valueToString = "\'" + fieldValue.toString() + "\'";
+                fieldName = field.getName();
             } else if (clazz.equals(Number.class)) {
                 typeToString = "int(3)";
-                valueToString = fieldValue.toString();
+                fieldName = field.getName();
+            } else {
+                typeToString = "bigint(20)";
+                fieldName = field.getName() + "_id";
+                alterTableString.append("alter table ")
+                        .append(myClazz.getSimpleName())
+                        .append(" add foreign key(")
+                        .append(fieldName)
+                        .append(") references ")
+                        .append(clazz.getSimpleName())
+                        .append("(id)");
             }
-            createIfNotExistsString.append(", ").append(fieldName).append(" ").append(typeToString);
-            insertEndString.append(", ").append(valueToString);
+
+            createIfNotExistsString.append(", ")
+                    .append(fieldName)
+                    .append(" ")
+                    .append(typeToString);
         }
-        createIfNotExistsString.append(")");
-        insertEndString.append(")");
+        execQuery(createIfNotExistsString.append(")").toString(), null);
 
-        execQuery("CREATE SEQUENCE IF NOT EXISTS id_seq START WITH 0 INCREMENT BY 1 nomaxvalue", null);
+        if (alterTableString.length() != 0) {
+            execQuery(alterTableString.toString(), null);
+        }
+    }
 
-        execQuery(createIfNotExistsString.toString(), null);
+    public <T extends DataSet> void save(T object) throws SQLException {
+        StringBuilder insertString = new StringBuilder();
+        insertString.append("insert into ")
+                .append(object.getClass().getSimpleName())
+                .append(" values(")
+                .append("NULL");
+
+        for (Field field : MySimpleReflectionHelper.getFieldsByObject(object)) {
+            String fieldName = field.getName();
+            Object fieldValue = MySimpleReflectionHelper.getFieldValue(object, fieldName);
+            Class<?> clazz = field.getType();
+            String valueToString = "";
+            if (clazz.equals(String.class)) {
+                valueToString = "\'" + fieldValue.toString() + "\'";
+            } else if (clazz.equals(Number.class)) {
+                valueToString = fieldValue.toString();
+            } else {
+                Object internalObject = MySimpleReflectionHelper.getFieldValue(object, fieldName);
+
+                save((T) internalObject);
+
+                long id = ((T) internalObject).getId();
+                valueToString = String.valueOf(id);
+            }
+            insertString.append(", ").append(valueToString);
+        }
+        insertString.append(")");
 
         ResultHandlerGetId resultHandlerGetId = new ResultHandlerGetId();
-        execQuery("call NEXT VALUE FOR id_seq", resultHandlerGetId);
-
-        user.setId(resultHandlerGetId.id);
-        insertString.append("insert into ")
-                .append(className)
-                .append(" values(")
-                .append(resultHandlerGetId.id)
-                .append(insertEndString.toString());
-
-        execQuery(insertString.toString(), null);
+        execQuery(insertString.toString(), resultHandlerGetId);
+        object.setId(resultHandlerGetId.id);
     }
 
     public <T extends DataSet> T load(long id, Class<T> clazz) throws SQLException {
@@ -73,11 +96,11 @@ public class UsersDAO {
         Map<String, String> result = resultHandlerGetUser.getResultMap();
 
         T instantiate = MySimpleReflectionHelper.instantiate(clazz, id);
-        Field[] fields = MySimpleReflectionHelper.getFields(instantiate);
+        Field[] fields = MySimpleReflectionHelper.getFieldsByObject(instantiate);
         if (fields.length != 0) {
             for (Field field : fields) {
                 String fieldName = field.getName();
-                Class<?> type = field.getType();
+                Class<T> type = (Class<T>) field.getType();
 
                 result.forEach((String key, String value) -> {
                     if (key.equals(fieldName.toUpperCase())) {
@@ -86,6 +109,14 @@ public class UsersDAO {
                         } else if (type.equals(Number.class)) {
                             MySimpleReflectionHelper.setFieldValue(instantiate, fieldName, Integer.parseInt(value));
                         }
+                    } else if (key.equals((fieldName + "_id").toUpperCase())) {
+                        T internalLoad = null;
+                        try {
+                            internalLoad = load(Long.valueOf(value), type);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                        MySimpleReflectionHelper.setFieldValue(instantiate, fieldName, internalLoad);
                     }
                 });
             }
@@ -95,13 +126,15 @@ public class UsersDAO {
 
     private void execQuery(String query, ResultHandler handler) throws SQLException {
         System.out.println(query);
-        try (Statement stat = connection.createStatement()) {
-            stat.execute(query);
-            ResultSet result = stat.getResultSet();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.execute();
             if (handler != null) {
-                handler.handle(result);
+                if (handler.getClass().equals(ResultHandlerGetId.class)) {
+                    handler.handle(preparedStatement.getGeneratedKeys());
+                } else if (handler.getClass().equals(ResultHandlerGetUser.class)) {
+                    handler.handle(preparedStatement.getResultSet());
+                }
             }
-            stat.close();
         } catch (SQLException e) {
             e.printStackTrace();
             throw e;
@@ -109,9 +142,7 @@ public class UsersDAO {
     }
 
     private class ResultHandlerGetUser implements ResultHandler {
-
         private Map<String, String> resultMap = new HashMap<>();
-
         Map<String, String> getResultMap() {
             return resultMap;
         }
@@ -127,7 +158,6 @@ public class UsersDAO {
     }
 
     private static class ResultHandlerGetId implements ResultHandler {
-
         private long id;
 
         public void handle(ResultSet result) throws SQLException {
@@ -135,5 +165,4 @@ public class UsersDAO {
             id = result.getLong(result.getMetaData().getColumnLabel(1));
         }
     }
-
 }
