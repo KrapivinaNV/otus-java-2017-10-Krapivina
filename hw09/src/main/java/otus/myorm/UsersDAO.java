@@ -1,9 +1,16 @@
 package otus.myorm;
 
 import otus.data.DataSet;
+import otus.myorm.annotations.MyManyToOne;
+import otus.myorm.annotations.MyOneToOne;
 
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.sql.*;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +31,7 @@ public class UsersDAO {
                 .append("(id bigint(20) NOT NULL auto_increment");
 
         for (Field field : MySimpleReflectionHelper.getFieldsByClass(myClazz)) {
-            String fieldName;
+            String fieldName = "";
             Class<?> clazz = field.getType();
             String typeToString = "";
             if (clazz.equals(String.class)) {
@@ -33,18 +40,20 @@ public class UsersDAO {
             } else if (clazz.equals(Number.class)) {
                 typeToString = "int(3)";
                 fieldName = field.getName();
-            } else {
-                typeToString = "bigint(20)";
-                fieldName = field.getName() + "_id";
-                alterTableString.append("alter table ")
-                        .append(myClazz.getSimpleName())
-                        .append(" add foreign key(")
-                        .append(fieldName)
-                        .append(") references ")
-                        .append(clazz.getSimpleName())
-                        .append("(id)");
+            }else if (!Collection.class.isAssignableFrom(clazz)) {
+             if(MySimpleReflectionHelper.ifFieldAnnotated(myClazz,field.getName(), MyOneToOne.class)
+                     || MySimpleReflectionHelper.ifFieldAnnotated(myClazz,field.getName(), MyManyToOne.class)) {
+                    typeToString = "bigint(20)";
+                    fieldName = field.getName() + "_id";
+                    alterTableString.append("alter table ")
+                            .append(myClazz.getSimpleName())
+                            .append(" add foreign key(")
+                            .append(fieldName)
+                            .append(") references ")
+                            .append(clazz.getSimpleName())
+                            .append("(id)");
+                }
             }
-
             createIfNotExistsString.append(", ")
                     .append(fieldName)
                     .append(" ")
@@ -75,9 +84,7 @@ public class UsersDAO {
                 valueToString = fieldValue.toString();
             } else {
                 Object internalObject = MySimpleReflectionHelper.getFieldValue(object, fieldName);
-
                 save((T) internalObject);
-
                 long id = ((T) internalObject).getId();
                 valueToString = String.valueOf(id);
             }

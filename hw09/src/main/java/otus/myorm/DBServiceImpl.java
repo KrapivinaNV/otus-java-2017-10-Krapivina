@@ -3,6 +3,7 @@ package otus.myorm;
 import otus.common.DBService;
 import otus.data.AddressDataSet;
 import otus.data.DataSet;
+import otus.data.PhoneDataSet;
 import otus.data.UserDataSet;
 
 import java.sql.Connection;
@@ -16,6 +17,8 @@ public class DBServiceImpl implements DBService {
         UsersDAO usersDAO = new UsersDAO(CONNECTION);
         usersDAO.prepareTables(AddressDataSet.class);
         usersDAO.prepareTables(UserDataSet.class);
+        usersDAO.prepareTables(PhoneDataSet.class);
+
     }
 
     @Override

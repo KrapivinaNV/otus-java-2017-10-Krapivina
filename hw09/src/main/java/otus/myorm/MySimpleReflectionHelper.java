@@ -1,8 +1,10 @@
 package otus.myorm;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -68,6 +70,20 @@ class MySimpleReflectionHelper {
         }
         return null;
     }
+
+    static <T> boolean ifFieldAnnotated(Class<T> type, String name, Class<? extends Annotation> annotation) {
+        try {
+            Field field = type.getDeclaredField(name);
+            if(field.isAnnotationPresent(annotation)) {
+                return true;
+            }
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
 
     static private Class<?>[] toClasses(Object[] args) {
         if (args == null) {

@@ -1,11 +1,14 @@
 package otus.data;
 
+import otus.myorm.annotations.MyManyToOne;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "phone")
 public class PhoneDataSet extends DataSet {
     private String number;
+    @MyManyToOne
     private UserDataSet user;
 
     public PhoneDataSet() {

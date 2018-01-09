@@ -43,12 +43,12 @@ public class Executor {
         UserDataSet user2 = new UserDataSet("User2", 31, new AddressDataSet("street2"));
         UserDataSet user3 = new UserDataSet("User3", 35, new AddressDataSet("street3"));
 
-        dbService.save(user1);
-        dbService.save(user2);
-        dbService.save(user3);
+     //   dbService.save(user1);
+     //   dbService.save(user2);
+     //   dbService.save(user3);
 
-        System.out.println(dbService.load(user1.getId(), UserDataSet.class).toString());
-        System.out.println(dbService.load(user3.getId(), UserDataSet.class).toString());
+     //   System.out.println(dbService.load(user1.getId(), UserDataSet.class).toString());
+     //   System.out.println(dbService.load(user3.getId(), UserDataSet.class).toString());
     }
 
     private static void myHibernateTest() throws SQLException, IOException {

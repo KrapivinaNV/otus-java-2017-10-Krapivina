@@ -1,6 +1,7 @@
 package otus.data;
 
 import org.hibernate.annotations.Type;
+import otus.myorm.annotations.MyOneToOne;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -11,8 +12,9 @@ public class UserDataSet extends DataSet {
 
     private String name;
     private Number age;
+    @MyOneToOne
     private AddressDataSet address;
-    //private Set<PhoneDataSet> phones;
+    private Set<PhoneDataSet> phones;
 
     public UserDataSet() {
     }
@@ -25,7 +27,7 @@ public class UserDataSet extends DataSet {
         this.name = name;
         this.age = age;
         this.address = address;
-        //this.phones = phones;
+        this.phones = phones;
     }
 
     public UserDataSet(String name, Number age, AddressDataSet address) {
@@ -72,18 +74,18 @@ public class UserDataSet extends DataSet {
         return address;
     }
 
-   // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-   // public Set<PhoneDataSet> getPhones() {
-   //     return phones;
-   // }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    public Set<PhoneDataSet> getPhones() {
+        return phones;
+    }
 
     public void setAddress(AddressDataSet address) {
         this.address = address;
     }
 
-   // public void setPhones(Set<PhoneDataSet> phones) {
-    //    this.phones = phones;
-    //}
+    public void setPhones(Set<PhoneDataSet> phones) {
+        this.phones = phones;
+    }
 
     @Override
     public String toString() {
@@ -91,7 +93,7 @@ public class UserDataSet extends DataSet {
                 "name='" + name + '\'' +
                 ", age=" + age +
                 ", address=" + address +
-               // ", phones=" + phones +
+                ", phones=" + phones +
                 '}';
     }
 }

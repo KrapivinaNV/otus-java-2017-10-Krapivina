@@ -30,4 +30,10 @@ public class AddressDataSet extends DataSet {
 
     public void setStreet(String street){this.street = street;}
 
+    @Override
+    public String toString() {
+        return "AddressDataSet{" +
+                "street='" + street + '\'' +
+                '}';
+    }
 }
