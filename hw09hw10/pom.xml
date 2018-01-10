@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <name>homework-9</name>
-    <artifactId>hw09</artifactId>
+    <name>homework-9-homework-10</name>
+    <artifactId>hw09hw10</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
