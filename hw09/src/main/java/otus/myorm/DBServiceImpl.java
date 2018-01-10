@@ -18,7 +18,6 @@ public class DBServiceImpl implements DBService {
         usersDAO.prepareTables(AddressDataSet.class);
         usersDAO.prepareTables(UserDataSet.class);
         usersDAO.prepareTables(PhoneDataSet.class);
-
     }
 
     @Override

@@ -1,9 +1,11 @@
 package otus.data;
 
 import org.hibernate.annotations.Type;
+import otus.myorm.annotations.MyOneToMany;
 import otus.myorm.annotations.MyOneToOne;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -14,6 +16,7 @@ public class UserDataSet extends DataSet {
     private Number age;
     @MyOneToOne
     private AddressDataSet address;
+    @MyOneToMany
     private Set<PhoneDataSet> phones;
 
     public UserDataSet() {

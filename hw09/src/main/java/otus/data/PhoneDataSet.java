@@ -18,6 +18,11 @@ public class PhoneDataSet extends DataSet {
         setId(id);
     }
 
+    public PhoneDataSet(Long id, UserDataSet user) {
+        setId(id);
+        this.user = user;
+    }
+
     public PhoneDataSet(String number) {
         this.number = number;
     }

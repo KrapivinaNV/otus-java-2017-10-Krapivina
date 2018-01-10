@@ -72,15 +72,45 @@ class MySimpleReflectionHelper {
     }
 
     static <T> boolean ifFieldAnnotated(Class<T> type, String name, Class<? extends Annotation> annotation) {
+        boolean isAccessible = true;
+        Field field = null;
         try {
-            Field field = type.getDeclaredField(name);
+            field = type.getDeclaredField(name);
+            isAccessible = field.isAccessible();
+            field.setAccessible(true);
             if(field.isAnnotationPresent(annotation)) {
                 return true;
             }
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
+        }finally {
+            if (field != null && !isAccessible) {
+                field.setAccessible(false);
+            }
         }
 
+        return false;
+    }
+
+    static <T> boolean ifFieldHasValue(Object object, String name) {
+
+        Field field = null;
+        boolean isAccessible = true;
+        try {
+            field = object.getClass().getDeclaredField(name);
+            isAccessible = field.isAccessible();
+            field.setAccessible(true);
+            if(field.get(object) != null){
+                return true;
+            }
+
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }finally {
+            if (field != null && !isAccessible) {
+                field.setAccessible(false);
+            }
+        }
         return false;
     }
 

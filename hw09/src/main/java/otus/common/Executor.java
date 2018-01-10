@@ -6,7 +6,9 @@ import org.hibernate.cfg.Configuration;
 import otus.data.AddressDataSet;
 import otus.data.PhoneDataSet;
 import otus.data.UserDataSet;
+import otus.hibernate.ConfigurationLoader;
 import otus.hibernate.DBServiceHibernateImpl;
+import otus.hibernate.PropertiesLoader;
 import otus.myorm.DBServiceImpl;
 
 import java.io.IOException;
@@ -20,10 +22,11 @@ public class Executor {
         Server server = null;
         try {
             server = Server.createWebServer().start(); // web console http://localhost:8082/
-                System.out.println("My ORM implementation:");
-                 myORMServiceImpl();
 
-            System.out.println("\nMy Hibernate implementation:");
+            System.out.println("My ORM test:");
+            myORMTest();
+
+            System.out.println("\nMy Hibernate test:");
             myHibernateTest();
 
         } catch (Exception ex) {
@@ -35,41 +38,32 @@ public class Executor {
         }
     }
 
-    static void myORMServiceImpl() throws SQLException {
+    static void myORMTest() throws SQLException {
 
-        DBServiceImpl dbService = new DBServiceImpl();
+        DBService dbService = new DBServiceImpl();
 
-        UserDataSet user1 = new UserDataSet("User1", 27, new AddressDataSet("street1"));
-        UserDataSet user2 = new UserDataSet("User2", 31, new AddressDataSet("street2"));
-        UserDataSet user3 = new UserDataSet("User3", 35, new AddressDataSet("street3"));
+        PhoneDataSet phone1 = new PhoneDataSet("890234467676");
+        PhoneDataSet phone2 = new PhoneDataSet("11111111111");
+        PhoneDataSet phone3 = new PhoneDataSet("22222222222");
 
-     //   dbService.save(user1);
-     //   dbService.save(user2);
-     //   dbService.save(user3);
+        UserDataSet user1 = new UserDataSet("User1", 27, new AddressDataSet("street1"), Sets.newHashSet(phone1, phone2));
+        UserDataSet user2 = new UserDataSet("User2", 31, new AddressDataSet("street2"), Sets.newHashSet(phone3));
+        UserDataSet user3 = new UserDataSet("User3", 31, new AddressDataSet("street3"), null);
 
-     //   System.out.println(dbService.load(user1.getId(), UserDataSet.class).toString());
-     //   System.out.println(dbService.load(user3.getId(), UserDataSet.class).toString());
+        dbService.save(user1);
+        dbService.save(user2);
+        dbService.save(user3);
+
+        System.out.println(dbService.load(user1.getId(), UserDataSet.class).toString());
+        System.out.println(dbService.load(user2.getId(), UserDataSet.class).toString());
+        System.out.println(dbService.load(user3.getId(), UserDataSet.class).toString());
     }
 
     private static void myHibernateTest() throws SQLException, IOException {
 
         PropertiesLoader propertiesLoader = new PropertiesLoader();
-
-        /////////////////// config loader //////////////////////
-
-        Configuration configuration = new Configuration();
-        configuration.addAnnotatedClass(AddressDataSet.class);
-        configuration.addAnnotatedClass(PhoneDataSet.class);
-        configuration.addAnnotatedClass(UserDataSet.class);
-
-        Properties properties = propertiesLoader.loadProperties();
-
-        /////////////////////////////
-
-        properties.stringPropertyNames()
-                .forEach(property -> configuration.setProperty(property, properties.getProperty(property)));
-
-        DBService dbServiceHibernate = new DBServiceHibernateImpl(configuration);
+        ConfigurationLoader configurationLoader = new ConfigurationLoader(propertiesLoader);
+        DBService dbServiceHibernate = new DBServiceHibernateImpl(configurationLoader.getConfiguration());
 
         try {
             PhoneDataSet phone1 = new PhoneDataSet("890234467676");
@@ -88,6 +82,12 @@ public class Executor {
                     new AddressDataSet("street2"),
                     Sets.newHashSet(phone3)
             );
+            UserDataSet user12 = new UserDataSet(
+                    "User12",
+                    12,
+                    new AddressDataSet("street3"),
+                    null
+            );
 
             phone1.setUser(user10);
             phone2.setUser(user10);
@@ -95,9 +95,11 @@ public class Executor {
 
             dbServiceHibernate.save(user10);
             dbServiceHibernate.save(user11);
+            dbServiceHibernate.save(user12);
 
             System.out.println(dbServiceHibernate.load(user10.getId(), UserDataSet.class));
             System.out.println(dbServiceHibernate.load(user11.getId(), UserDataSet.class));
+            System.out.println(dbServiceHibernate.load(user12.getId(), UserDataSet.class));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
