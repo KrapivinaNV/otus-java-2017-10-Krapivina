@@ -2,7 +2,6 @@ package otus.common;
 
 import com.google.common.collect.Sets;
 import org.h2.tools.Server;
-import org.hibernate.cfg.Configuration;
 import otus.data.AddressDataSet;
 import otus.data.PhoneDataSet;
 import otus.data.UserDataSet;
@@ -13,7 +12,6 @@ import otus.myorm.DBServiceImpl;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Properties;
 
 public class Executor {
 
@@ -48,7 +46,7 @@ public class Executor {
 
         UserDataSet user1 = new UserDataSet("User1", 27, new AddressDataSet("street1"), Sets.newHashSet(phone1, phone2));
         UserDataSet user2 = new UserDataSet("User2", 31, new AddressDataSet("street2"), Sets.newHashSet(phone3));
-        UserDataSet user3 = new UserDataSet("User3", 31, new AddressDataSet("street3"), null);
+        UserDataSet user3 = new UserDataSet("User3", 31, null, null);
 
         dbService.save(user1);
         dbService.save(user2);
@@ -85,7 +83,7 @@ public class Executor {
             UserDataSet user12 = new UserDataSet(
                     "User12",
                     12,
-                    new AddressDataSet("street3"),
+                    null,
                     null
             );
 

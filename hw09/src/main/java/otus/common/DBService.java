@@ -1,7 +1,8 @@
 package otus.common;
 
-import java.sql.SQLException;
 import otus.data.DataSet;
+
+import java.sql.SQLException;
 
 public interface DBService {
     <T extends DataSet> void save(T object) throws SQLException;

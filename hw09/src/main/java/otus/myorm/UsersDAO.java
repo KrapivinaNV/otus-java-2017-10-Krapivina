@@ -82,14 +82,19 @@ public class UsersDAO {
                 collection = MySimpleReflectionHelper.getFieldValue(object, fieldName);
             } else if (MySimpleReflectionHelper.ifFieldAnnotated(object.getClass(), field.getName(), MyOneToOne.class)) {
                 Object internalObject = MySimpleReflectionHelper.getFieldValue(object, fieldName);
-                save((T) internalObject);
-                long id = ((T) internalObject).getId();
-                valueToString = String.valueOf(id);
+                if (internalObject != null) {
+                    save((T) internalObject);
+                    long id = ((T) internalObject).getId();
+                    valueToString = String.valueOf(id);
+                } else {
+                    valueToString = "NULL";
+                }
             } else if (MySimpleReflectionHelper.ifFieldAnnotated(object.getClass(), field.getName(), MyManyToOne.class)) {
                 valueToString = "NULL";
             }
-
-            insertString.append(", ").append(valueToString);
+            if (!valueToString.isEmpty()) {
+                insertString.append(", ").append(valueToString);
+            }
         }
         insertString.append(")");
 
@@ -125,39 +130,43 @@ public class UsersDAO {
         ResultHandlerGetUser resultHandlerGetUser = new ResultHandlerGetUser();
         execQuery("select * from " + clazz.getSimpleName() + " where id=" + id, resultHandlerGetUser);
         Map<String, String> result = resultHandlerGetUser.getResultMap();
+        T instantiate = null;
+        if (result != null) {
+            instantiate = MySimpleReflectionHelper.instantiate(clazz, id);
+            fillNewObject(instantiate, result);
 
-        T instantiate = MySimpleReflectionHelper.instantiate(clazz, id);
-        fillNewObject(instantiate, result);
+            Field[] fieldsByObject = MySimpleReflectionHelper.getFieldsByObject(instantiate);
+            if (fieldsByObject != null) {
+                //one to many
+                for (Field field : fieldsByObject) {
+                    Class<T> type = (Class<T>) field.getType();
+                    String fieldName = field.getName();
+                    if (Collection.class.isAssignableFrom(type)
+                            && MySimpleReflectionHelper.ifFieldAnnotated(instantiate.getClass(), fieldName, MyOneToMany.class)) {
+                        Object collection = MySimpleReflectionHelper.getFieldValue(instantiate, fieldName);
+                        if (collection == null) {
+                            Class<T> elementType = (Class<T>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                            //Class<T> collectionType = (Class<T>) ((ParameterizedType) field.getGenericType()).getRawType();
+                            StringBuilder oneToManyString = new StringBuilder();
+                            oneToManyString.append("select * from ")
+                                    .append(elementType.getSimpleName())
+                                    .append(" where ")
+                                    .append(clazz.getSimpleName().replace("DataSet", "_id = "))
+                                    .append(id);
+                            ResultHandlerGetPhones resultHandlerGetPhones = new ResultHandlerGetPhones();
+                            execQuery(oneToManyString.toString(), resultHandlerGetPhones);
+                            List<Map<String, String>> resultList = resultHandlerGetPhones.resultList;
 
-        //one to many
-        for (Field field : MySimpleReflectionHelper.getFieldsByObject(instantiate)) {
-            Class<T> type = (Class<T>) field.getType();
-            String fieldName = field.getName();
-            if (Collection.class.isAssignableFrom(type)
-                    && MySimpleReflectionHelper.ifFieldAnnotated(instantiate.getClass(), fieldName, MyOneToMany.class)) {
-                Object collection = MySimpleReflectionHelper.getFieldValue(instantiate, fieldName);
-                if (collection == null) {
-                    Class<T> elementType = (Class<T>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                    Class<T> collectionType = (Class<T>) ((ParameterizedType) field.getGenericType()).getRawType();
-
-                    StringBuilder oneToManyString = new StringBuilder();
-                    oneToManyString.append("select * from ")
-                            .append(elementType.getSimpleName())
-                            .append(" where ")
-                            .append(clazz.getSimpleName().replace("DataSet", "_id = "))
-                            .append(id);
-                    ResultHandlerGetPhones resultHandlerGetPhones = new ResultHandlerGetPhones();
-                    execQuery(oneToManyString.toString(), resultHandlerGetPhones);
-                    List<Map<String, String>> resultList = resultHandlerGetPhones.resultList;
-
-                    if (resultList != null) {
-                        collection = new HashSet<>();
-                        for (Map<String, String> myResult : resultList) {
-                            T element = MySimpleReflectionHelper.instantiate((Class<T>) elementType, Long.valueOf(myResult.get("ID")), instantiate);
-                            T fillElement = fillNewObject(element, myResult);
-                            ((Collection) collection).add(fillElement);
+                            if (resultList != null) {
+                                collection = new HashSet<>();
+                                for (Map<String, String> myResult : resultList) {
+                                    T element = MySimpleReflectionHelper.instantiate(elementType, Long.valueOf(myResult.get("ID")), instantiate);
+                                    T fillElement = fillNewObject(element, myResult);
+                                    ((Collection) collection).add(fillElement);
+                                }
+                                MySimpleReflectionHelper.setFieldValue(instantiate, fieldName, collection);
+                            }
                         }
-                        MySimpleReflectionHelper.setFieldValue(instantiate, fieldName, collection);
                     }
                 }
             }
@@ -175,19 +184,21 @@ public class UsersDAO {
                 if (!MySimpleReflectionHelper.ifFieldHasValue(object, fieldName)) {
                     result.forEach((String key, String value) -> {
                         if (key.equals(fieldName.toUpperCase())) {
-                            if (type.equals(String.class)) {
+                            if (type.isAssignableFrom(String.class)) {
                                 MySimpleReflectionHelper.setFieldValue(object, fieldName, value);
-                            } else if (type.equals(Number.class)) {
+                            } else if (type.isAssignableFrom(Number.class)) {
                                 MySimpleReflectionHelper.setFieldValue(object, fieldName, Integer.parseInt(value));
                             }
                         } else if (key.equals((fieldName + "_id").toUpperCase())) {
                             T internalLoad = null;
-                            try {
-                                internalLoad = load(Long.valueOf(value), type);
-                            } catch (SQLException e) {
-                                e.printStackTrace();
+                            if (value != null) {
+                                try {
+                                    internalLoad = load(Long.valueOf(value), type);
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+                                MySimpleReflectionHelper.setFieldValue(object, fieldName, internalLoad);
                             }
-                            MySimpleReflectionHelper.setFieldValue(object, fieldName, internalLoad);
                         }
                     });
                 }
