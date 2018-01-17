@@ -1,4 +1,4 @@
-package otus.myorm;
+package otus.data;
 
 public abstract class DataSet {
     private long id;

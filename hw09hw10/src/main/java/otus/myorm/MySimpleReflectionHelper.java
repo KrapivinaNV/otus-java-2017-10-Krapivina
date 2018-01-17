@@ -1,8 +1,10 @@
 package otus.myorm;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,8 +12,13 @@ import java.util.stream.Collectors;
 @SuppressWarnings("SameParameterValue")
 class MySimpleReflectionHelper {
 
-    static Field[] getFields(Object object) {
+    static Field[] getFieldsByObject(Object object) {
         return object.getClass().getDeclaredFields();
+
+    }
+
+    static Field[] getFieldsByClass(Class clazz) {
+        return clazz.getDeclaredFields();
 
     }
 
@@ -63,6 +70,50 @@ class MySimpleReflectionHelper {
         }
         return null;
     }
+
+    static <T> boolean ifFieldAnnotated(Class<T> type, String name, Class<? extends Annotation> annotation) {
+        boolean isAccessible = true;
+        Field field = null;
+        try {
+            field = type.getDeclaredField(name);
+            isAccessible = field.isAccessible();
+            field.setAccessible(true);
+            if(field.isAnnotationPresent(annotation)) {
+                return true;
+            }
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }finally {
+            if (field != null && !isAccessible) {
+                field.setAccessible(false);
+            }
+        }
+
+        return false;
+    }
+
+    static <T> boolean ifFieldHasValue(Object object, String name) {
+
+        Field field = null;
+        boolean isAccessible = true;
+        try {
+            field = object.getClass().getDeclaredField(name);
+            isAccessible = field.isAccessible();
+            field.setAccessible(true);
+            if(field.get(object) != null){
+                return true;
+            }
+
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }finally {
+            if (field != null && !isAccessible) {
+                field.setAccessible(false);
+            }
+        }
+        return false;
+    }
+
 
     static private Class<?>[] toClasses(Object[] args) {
         if (args == null) {
