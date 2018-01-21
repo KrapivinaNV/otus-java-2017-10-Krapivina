@@ -9,16 +9,11 @@ import otus.data.UserDataSet;
 import otus.hibernate.ConfigurationLoader;
 import otus.hibernate.DBServiceHibernateImpl;
 import otus.hibernate.cache.CacheEngineImpl;
-import otus.hibernate.cache.MyCacheBuilder;
-import otus.hibernate.cache.MyElement;
 import otus.myorm.DBServiceImpl;
 
 import java.io.IOException;
-import java.lang.ref.SoftReference;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 
 public class Executor {
 
@@ -124,31 +119,37 @@ public class Executor {
 
 
         ConfigurationLoader configurationLoader = new ConfigurationLoader();
-        CacheEngineImpl<Long, DataSet> cacheEngine = new CacheEngineImpl<>(5000, 0, 0, true);
+        CacheEngineImpl<Long, DataSet> cacheEngine = new CacheEngineImpl<>(860, 0, 0, true);
         DBService dbServiceHibernate = new DBServiceHibernateImpl(configurationLoader.getConfiguration(), cacheEngine);
 
-        int count = 10000;
+        int count = 1400;
 
         try {
             for (int i = 0; i < count; i++) {
+                PhoneDataSet phone1 = new PhoneDataSet("11111111111");
+                PhoneDataSet phone2 = new PhoneDataSet("22222222222");
                 UserDataSet user = new UserDataSet(
                         "User" + i,
                         i,
                         new AddressDataSet("street"),
-                        null
+                        Sets.newHashSet(phone1, phone2)
                 );
+                phone1.setUser(user);
+                phone2.setUser(user);
                 dbServiceHibernate.save(user);
             }
 
 
-            for (int i = 0; i < count/3; i++) {
+            for (int i = 0; i < count; i++) {
                 Random random = new Random();
-                System.out.println(dbServiceHibernate.load(random.nextInt(count) + 1, UserDataSet.class));
+                int index = random.nextInt(count) + 1;
+                UserDataSet load = dbServiceHibernate.load(index, UserDataSet.class);
+                System.out.println("id = "+ index + " Data = " + load);
             }
 
-            System.out.println("Cache info:" + cacheEngine.getInfo());
             System.out.println("Cache hint count:" + cacheEngine.getHitCount());
             System.out.println("Cache mis count:" + cacheEngine.getMissCount());
+            System.out.println("Cache GC mis count:" + cacheEngine.getGCMissCount());
 
 
         } catch (Exception e) {

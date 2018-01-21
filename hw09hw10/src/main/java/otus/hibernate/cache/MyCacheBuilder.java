@@ -11,6 +11,4 @@ public interface MyCacheBuilder <K, V> {
     int getMissCount();
 
     void dispose();
-
-    String getInfo();
 }
