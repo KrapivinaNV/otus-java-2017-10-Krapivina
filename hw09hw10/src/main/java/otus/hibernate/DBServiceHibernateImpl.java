@@ -36,14 +36,15 @@ public class DBServiceHibernateImpl implements DBService {
     public <T extends DataSet> T load(long id, Class<T> clazz) {
         T dataSet;
         MyElement myElement = myCacheBuilder.get(id);
-        if (myElement == null) {
+        if (myElement != null && myElement.getValue() != null) {
+            dataSet = (T) myElement.getValue();
+        }
+        else{
             try (Session session = sessionFactory.openSession()) {
                 DataSetUsersDAO dataSetUsersDAO = new DataSetUsersDAO(session);
                 dataSet = dataSetUsersDAO.load(id, clazz);
             }
             saveInCache(id, dataSet);
-        } else {
-            dataSet = (T) myElement.getValue().get();
         }
         return dataSet;
     }

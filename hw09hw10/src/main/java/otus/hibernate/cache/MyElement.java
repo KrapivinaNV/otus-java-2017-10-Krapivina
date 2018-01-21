@@ -27,8 +27,8 @@ public class MyElement<K, V>  {
         return key;
     }
 
-    public SoftReference<V> getValue() {
-        return value;
+    public V getValue() {
+        return value.get();
     }
 
     public long getCreationTime() {
@@ -41,14 +41,5 @@ public class MyElement<K, V>  {
 
     public void setAccessed() {
         lastAccessTime = getCurrentTime();
-    }
-
-
-    @Override
-    public String toString() {
-        return "MyElement{" +
-                "key=" + key +
-                ", value=" + value.get() +
-                "\n";
     }
 }
