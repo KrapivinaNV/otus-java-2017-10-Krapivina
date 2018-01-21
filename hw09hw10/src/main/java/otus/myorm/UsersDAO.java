@@ -155,7 +155,7 @@ public class UsersDAO {
                                     .append(id);
                             ResultHandlerGetPhones resultHandlerGetPhones = new ResultHandlerGetPhones();
                             execQuery(oneToManyString.toString(), resultHandlerGetPhones);
-                            List<Map<String, String>> resultList = resultHandlerGetPhones.resultList;
+                            List<Map<String, String>> resultList = resultHandlerGetPhones.getResultList();
 
                             if (resultList != null) {
                                 collection = new HashSet<>();
@@ -238,6 +238,7 @@ public class UsersDAO {
             for (int index = 1; index < columnCount + 1; index++) {
                 resultMap.put(metaData.getColumnName(index), result.getString(index));
             }
+            result.close();
         }
     }
 
@@ -260,10 +261,9 @@ public class UsersDAO {
                         resultPhones.put(metaData.getColumnName(index), result.getString(index));
                     }
                     resultList.add(resultPhones);
-
-
                 }
             }
+            result.close();
         }
     }
 
@@ -273,6 +273,7 @@ public class UsersDAO {
         public void handle(ResultSet result) throws SQLException {
             result.next();
             id = result.getLong(result.getMetaData().getColumnLabel(1));
+            result.close();
         }
     }
 }

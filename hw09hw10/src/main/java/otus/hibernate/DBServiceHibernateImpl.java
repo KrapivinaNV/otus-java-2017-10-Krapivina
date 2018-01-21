@@ -2,25 +2,25 @@ package otus.hibernate;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.service.ServiceRegistry;
 import otus.common.DBService;
 import otus.data.DataSet;
+import otus.hibernate.cache.MyCacheBuilder;
+import otus.hibernate.cache.MyElement;
+
+import java.lang.ref.SoftReference;
 
 public class DBServiceHibernateImpl implements DBService {
 
     private final SessionFactory sessionFactory;
+    private MyCacheBuilder<Long, DataSet> myCacheBuilder;
 
-    public DBServiceHibernateImpl(Configuration configuration) {
-        sessionFactory = createSessionFactory(configuration);
-    }
+    public DBServiceHibernateImpl(Configuration configuration, MyCacheBuilder<Long, DataSet> cacheBuilder) {
 
-    private static SessionFactory createSessionFactory(Configuration configuration) {
-        StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder();
-        builder.applySettings(configuration.getProperties());
-        ServiceRegistry serviceRegistry = builder.build();
-        return configuration.buildSessionFactory(serviceRegistry);
+        sessionFactory = configuration.buildSessionFactory();
+        if (cacheBuilder != null) {
+            myCacheBuilder = cacheBuilder;
+        }
     }
 
     @Override
@@ -29,23 +29,36 @@ public class DBServiceHibernateImpl implements DBService {
             DataSetUsersDAO dataSetUsersDAO = new DataSetUsersDAO(session);
             dataSetUsersDAO.save(object);
         }
+        saveInCache(object.getId(), object);
     }
 
     @Override
     public <T extends DataSet> T load(long id, Class<T> clazz) {
         T dataSet;
-        try (Session session = sessionFactory.openSession()) {
-            DataSetUsersDAO dataSetUsersDAO = new DataSetUsersDAO(session);
-            dataSet = dataSetUsersDAO.load(id, clazz);
+        MyElement myElement = myCacheBuilder.get(id);
+        if (myElement == null) {
+            try (Session session = sessionFactory.openSession()) {
+                DataSetUsersDAO dataSetUsersDAO = new DataSetUsersDAO(session);
+                dataSet = dataSetUsersDAO.load(id, clazz);
+            }
+            saveInCache(id, dataSet);
+        } else {
+            dataSet = (T) myElement.getValue().get();
         }
         return dataSet;
     }
+
 
     @Override
     public void shutdown() {
         if (sessionFactory != null && !sessionFactory.isClosed()) {
             sessionFactory.close();
         }
+    }
+
+    private void saveInCache(Long id, DataSet object) {
+        MyElement<Long, DataSet> myElement = new MyElement<>(id, object);
+        myCacheBuilder.put(myElement);
     }
 }
 

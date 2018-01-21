@@ -10,24 +10,12 @@ import java.util.Properties;
 
 public class ConfigurationLoader {
 
-    private PropertiesLoader propertiesLoader;
     private Configuration configuration = new Configuration();
 
-    public ConfigurationLoader( PropertiesLoader propertiesLoader) throws IOException {
-        this.propertiesLoader = propertiesLoader;
-        configuration.addAnnotatedClass(AddressDataSet.class);
-        configuration.addAnnotatedClass(PhoneDataSet.class);
-        configuration.addAnnotatedClass(UserDataSet.class);
-
-        Properties properties = propertiesLoader.loadProperties();
-        properties.stringPropertyNames()
-                .forEach(property -> configuration.setProperty(property, properties.getProperty(property)));
+    public ConfigurationLoader() {
+        configuration.configure("hibernate.cfg.xml");
     }
     public Configuration getConfiguration(){
         return configuration;
     }
-
-
-
-
 }

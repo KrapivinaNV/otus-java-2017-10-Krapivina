@@ -3,15 +3,22 @@ package otus.common;
 import com.google.common.collect.Sets;
 import org.h2.tools.Server;
 import otus.data.AddressDataSet;
+import otus.data.DataSet;
 import otus.data.PhoneDataSet;
 import otus.data.UserDataSet;
 import otus.hibernate.ConfigurationLoader;
 import otus.hibernate.DBServiceHibernateImpl;
-import otus.hibernate.PropertiesLoader;
+import otus.hibernate.cache.CacheEngineImpl;
+import otus.hibernate.cache.MyCacheBuilder;
+import otus.hibernate.cache.MyElement;
 import otus.myorm.DBServiceImpl;
 
 import java.io.IOException;
+import java.lang.ref.SoftReference;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 
 public class Executor {
 
@@ -21,11 +28,13 @@ public class Executor {
         try {
             server = Server.createWebServer().start(); // web console http://localhost:8082/
 
-            System.out.println("My ORM test:");
-            myORMTest();
+           // System.out.println("My ORM test:");
+           // myORMTest();
 
-            System.out.println("\nMy Hibernate test:");
-            myHibernateTest();
+           // System.out.println("\nMy Hibernate test:");
+           // myHibernateTest();
+
+            myCacheTest();
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -58,10 +67,9 @@ public class Executor {
     }
 
     private static void myHibernateTest() throws SQLException, IOException {
-
-        PropertiesLoader propertiesLoader = new PropertiesLoader();
-        ConfigurationLoader configurationLoader = new ConfigurationLoader(propertiesLoader);
-        DBService dbServiceHibernate = new DBServiceHibernateImpl(configurationLoader.getConfiguration());
+        ConfigurationLoader configurationLoader = new ConfigurationLoader();
+        CacheEngineImpl<Long, DataSet> cacheEngine = new CacheEngineImpl<>(2, 0, 0, true);
+        DBService dbServiceHibernate = new DBServiceHibernateImpl(configurationLoader.getConfiguration(), cacheEngine);
 
         try {
             PhoneDataSet phone1 = new PhoneDataSet("890234467676");
@@ -98,10 +106,55 @@ public class Executor {
             System.out.println(dbServiceHibernate.load(user10.getId(), UserDataSet.class));
             System.out.println(dbServiceHibernate.load(user11.getId(), UserDataSet.class));
             System.out.println(dbServiceHibernate.load(user12.getId(), UserDataSet.class));
+
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             //dbServiceHibernate.shutdown();
+        }
+    }
+
+
+    private static void myCacheTest() throws SQLException, IOException {
+
+        //-Xms8m
+        //-Xmx8m
+
+
+
+        ConfigurationLoader configurationLoader = new ConfigurationLoader();
+        CacheEngineImpl<Long, DataSet> cacheEngine = new CacheEngineImpl<>(5000, 0, 0, true);
+        DBService dbServiceHibernate = new DBServiceHibernateImpl(configurationLoader.getConfiguration(), cacheEngine);
+
+        int count = 10000;
+
+        try {
+            for (int i = 0; i < count; i++) {
+                UserDataSet user = new UserDataSet(
+                        "User" + i,
+                        i,
+                        new AddressDataSet("street"),
+                        null
+                );
+                dbServiceHibernate.save(user);
+            }
+
+
+            for (int i = 0; i < count/3; i++) {
+                Random random = new Random();
+                System.out.println(dbServiceHibernate.load(random.nextInt(count) + 1, UserDataSet.class));
+            }
+
+            System.out.println("Cache info:" + cacheEngine.getInfo());
+            System.out.println("Cache hint count:" + cacheEngine.getHitCount());
+            System.out.println("Cache mis count:" + cacheEngine.getMissCount());
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            cacheEngine.dispose();
         }
     }
 }
