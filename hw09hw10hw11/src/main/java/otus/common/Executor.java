@@ -29,7 +29,7 @@ public class Executor {
            // System.out.println("\nMy Hibernate test:");
            // myHibernateTest();
 
-            myCacheTest();
+            myCacheTest(); // -Xms8m -Xmx8m
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -112,12 +112,6 @@ public class Executor {
 
 
     private static void myCacheTest() throws SQLException, IOException {
-
-        //-Xms8m
-        //-Xmx8m
-
-
-
         ConfigurationLoader configurationLoader = new ConfigurationLoader();
         CacheEngineImpl<Long, DataSet> cacheEngine = new CacheEngineImpl<>(860, 0, 0, true);
         DBService dbServiceHibernate = new DBServiceHibernateImpl(configurationLoader.getConfiguration(), cacheEngine);
@@ -139,7 +133,6 @@ public class Executor {
                 dbServiceHibernate.save(user);
             }
 
-
             for (int i = 0; i < count; i++) {
                 Random random = new Random();
                 int index = random.nextInt(count) + 1;
@@ -150,8 +143,6 @@ public class Executor {
             System.out.println("Cache hint count:" + cacheEngine.getHitCount());
             System.out.println("Cache mis count:" + cacheEngine.getMissCount());
             System.out.println("Cache GC mis count:" + cacheEngine.getGCMissCount());
-
-
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
