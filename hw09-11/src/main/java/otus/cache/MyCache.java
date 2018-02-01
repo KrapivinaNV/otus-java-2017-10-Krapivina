@@ -1,6 +1,6 @@
-package otus.hibernate.cache;
+package otus.cache;
 
-public interface MyCacheBuilder <K, V> {
+public interface MyCache <K, V> {
 
     void put(MyElement<K, V> element);
 

@@ -1,10 +1,10 @@
-package otus.hibernate.cache;
+package otus.cache;
 
 import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.function.Function;
 
-public class CacheEngineImpl<K, V> implements MyCacheBuilder<K, V> {
+public class CacheEngineImpl<K, V> implements MyCache<K, V> {
     private static final int TIME_THRESHOLD_MS = 5;
 
     private final int maxElements;

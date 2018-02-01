@@ -1,14 +1,15 @@
-package otus.common;
+package otus;
 
 import com.google.common.collect.Sets;
 import org.h2.tools.Server;
+import otus.common.DBService;
 import otus.data.AddressDataSet;
 import otus.data.DataSet;
 import otus.data.PhoneDataSet;
 import otus.data.UserDataSet;
 import otus.hibernate.ConfigurationLoader;
 import otus.hibernate.DBServiceHibernateImpl;
-import otus.hibernate.cache.CacheEngineImpl;
+import otus.cache.CacheEngineImpl;
 import otus.myorm.DBServiceImpl;
 
 import java.io.IOException;

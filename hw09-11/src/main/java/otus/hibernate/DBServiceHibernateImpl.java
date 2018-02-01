@@ -5,10 +5,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import otus.common.DBService;
 import otus.data.DataSet;
-import otus.hibernate.cache.MyCacheBuilder;
-import otus.hibernate.cache.MyElement;
-
-import java.lang.ref.SoftReference;
+import otus.cache.MyCacheBuilder;
+import otus.cache.MyElement;
 
 public class DBServiceHibernateImpl implements DBService {
 

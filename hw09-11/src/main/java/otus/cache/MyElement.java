@@ -1,6 +1,4 @@
-package otus.hibernate.cache;
-
-import otus.data.DataSet;
+package otus.cache;
 
 import java.lang.ref.SoftReference;
 
