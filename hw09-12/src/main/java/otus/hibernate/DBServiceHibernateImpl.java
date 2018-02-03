@@ -3,17 +3,17 @@ package otus.hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import otus.cache.MyCache;
 import otus.common.DBService;
 import otus.data.DataSet;
-import otus.cache.MyCacheBuilder;
 import otus.cache.MyElement;
 
 public class DBServiceHibernateImpl implements DBService {
 
     private final SessionFactory sessionFactory;
-    private MyCacheBuilder<Long, DataSet> myCacheBuilder;
+    private MyCache<Long, DataSet> myCacheBuilder;
 
-    public DBServiceHibernateImpl(Configuration configuration, MyCacheBuilder<Long, DataSet> cacheBuilder) {
+    public DBServiceHibernateImpl(Configuration configuration, MyCache<Long, DataSet> cacheBuilder) {
 
         sessionFactory = configuration.buildSessionFactory();
         if (cacheBuilder != null) {
