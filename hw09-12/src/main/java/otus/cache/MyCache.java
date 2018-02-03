@@ -10,5 +10,7 @@ public interface MyCache <K, V> {
 
     int getMissCount();
 
+    int getGCMissCount();
+
     void dispose();
 }

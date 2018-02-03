@@ -7,10 +7,7 @@ import java.util.function.Function;
 public class CacheEngineImpl<K, V> implements MyCache<K, V> {
     private static final int TIME_THRESHOLD_MS = 5;
 
-    private final int maxElements;
-    private final long lifeTimeMs;
-    private final long idleTimeMs;
-    private final boolean isEternal;
+    private CacheConfig cacheConfig;
 
     private final Map<K, SoftReference<MyElement<K, V>>> elements = new LinkedHashMap<>();
     private final Timer timer = new Timer();
@@ -19,15 +16,12 @@ public class CacheEngineImpl<K, V> implements MyCache<K, V> {
     private int miss = 0;
     private int gcMiss = 0;
 
-    public CacheEngineImpl(int maxElements, long lifeTimeMs, long idleTimeMs, boolean isEternal) {
-        this.maxElements = maxElements;
-        this.lifeTimeMs = lifeTimeMs > 0 ? lifeTimeMs : 0;
-        this.idleTimeMs = idleTimeMs > 0 ? idleTimeMs : 0;
-        this.isEternal = lifeTimeMs == 0 && idleTimeMs == 0 || isEternal;
+    public CacheEngineImpl(CacheConfig config) {
+        this.cacheConfig = config;
     }
 
     public void put(MyElement<K, V> element) {
-        if (elements.size() == maxElements) {
+        if (elements.size() == cacheConfig.getMaxElements()) {
             boolean anyRemoved = elements.entrySet().removeIf(entry -> entry.getValue().get() == null);
             if (!anyRemoved) {
                 Optional<Map.Entry<K, SoftReference<MyElement<K, V>>>> min = elements.entrySet().stream()
@@ -37,19 +31,19 @@ public class CacheEngineImpl<K, V> implements MyCache<K, V> {
             }
         }
 
-        if (elements.size() < maxElements) {
+        if (elements.size() < cacheConfig.getMaxElements()) {
             SoftReference<MyElement<K, V>> myElementSoftReference = new SoftReference<>(element);
             K key = element.getKey();
             elements.put(key, myElementSoftReference);
 
-            if (!isEternal) {
-                if (lifeTimeMs != 0) {
-                    TimerTask lifeTimerTask = getTimerTask(key, lifeElement -> lifeElement.getCreationTime() + lifeTimeMs);
-                    timer.schedule(lifeTimerTask, lifeTimeMs);
+            if (!cacheConfig.isEternal()) {
+                if (cacheConfig.getLifeTimeMs() != 0) {
+                    TimerTask lifeTimerTask = getTimerTask(key, lifeElement -> lifeElement.getCreationTime() + cacheConfig.getLifeTimeMs());
+                    timer.schedule(lifeTimerTask, cacheConfig.getLifeTimeMs());
                 }
-                if (idleTimeMs != 0) {
-                    TimerTask idleTimerTask = getTimerTask(key, idleElement -> idleElement.getLastAccessTime() + idleTimeMs);
-                    timer.schedule(idleTimerTask, idleTimeMs, idleTimeMs);
+                if (cacheConfig.getIdleTimeMs() != 0) {
+                    TimerTask idleTimerTask = getTimerTask(key, idleElement -> idleElement.getLastAccessTime() + cacheConfig.getIdleTimeMs());
+                    timer.schedule(idleTimerTask, cacheConfig.getIdleTimeMs(), cacheConfig.getIdleTimeMs());
                 }
             }
         }

@@ -1,7 +1,14 @@
 package otus;
 
 import com.google.common.collect.Sets;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.h2.tools.Server;
+import otus.cache.CacheConfig;
+import otus.cache.CacheEngineImpl;
+import otus.cache.CacheHolder;
+import otus.cache.MyCache;
 import otus.common.DBService;
 import otus.data.AddressDataSet;
 import otus.data.DataSet;
@@ -9,14 +16,17 @@ import otus.data.PhoneDataSet;
 import otus.data.UserDataSet;
 import otus.hibernate.ConfigurationLoader;
 import otus.hibernate.DBServiceHibernateImpl;
-import otus.cache.CacheEngineImpl;
+import otus.jetty.AdminServlet;
+import otus.jetty.LoginServlet;
 import otus.myorm.DBServiceImpl;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Random;
 
-public class Executor {
+public class MyExecutor {
+
+    private static final String PUBLIC_HTML = "public_html";
 
     public static void main(String[] args) {
 
@@ -24,13 +34,15 @@ public class Executor {
         try {
             server = Server.createWebServer().start(); // web console http://localhost:8082/
 
-           // System.out.println("My ORM test:");
-           // myORMTest();
+            // System.out.println("My ORM test:");
+            // myORMTest();
 
-           // System.out.println("\nMy Hibernate test:");
-           // myHibernateTest();
+            // System.out.println("\nMy Hibernate test:");
+            // myHibernateTest();
 
-            myCacheTest(); // -Xms8m -Xmx8m
+            // myCacheTest(); // -Xms8m -Xmx8m
+
+            myServletsTest();
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -63,8 +75,10 @@ public class Executor {
     }
 
     private static void myHibernateTest() throws SQLException, IOException {
+
+        MyCache<Long, DataSet> cacheEngine = CacheHolder.getMyCache();
+
         ConfigurationLoader configurationLoader = new ConfigurationLoader();
-        CacheEngineImpl<Long, DataSet> cacheEngine = new CacheEngineImpl<>(2, 0, 0, true);
         DBService dbServiceHibernate = new DBServiceHibernateImpl(configurationLoader.getConfiguration(), cacheEngine);
 
         try {
@@ -111,35 +125,15 @@ public class Executor {
         }
     }
 
-
     private static void myCacheTest() throws SQLException, IOException {
+
+        MyCache<Long, DataSet> cacheEngine = CacheHolder.getMyCache();
+
         ConfigurationLoader configurationLoader = new ConfigurationLoader();
-        CacheEngineImpl<Long, DataSet> cacheEngine = new CacheEngineImpl<>(860, 0, 0, true);
         DBService dbServiceHibernate = new DBServiceHibernateImpl(configurationLoader.getConfiguration(), cacheEngine);
 
-        int count = 1400;
-
         try {
-            for (int i = 0; i < count; i++) {
-                PhoneDataSet phone1 = new PhoneDataSet("11111111111");
-                PhoneDataSet phone2 = new PhoneDataSet("22222222222");
-                UserDataSet user = new UserDataSet(
-                        "User" + i,
-                        i,
-                        new AddressDataSet("street"),
-                        Sets.newHashSet(phone1, phone2)
-                );
-                phone1.setUser(user);
-                phone2.setUser(user);
-                dbServiceHibernate.save(user);
-            }
-
-            for (int i = 0; i < count; i++) {
-                Random random = new Random();
-                int index = random.nextInt(count) + 1;
-                UserDataSet load = dbServiceHibernate.load(index, UserDataSet.class);
-                System.out.println("id = "+ index + " Data = " + load);
-            }
+            generateUsers(1400, dbServiceHibernate);
 
             System.out.println("Cache hint count:" + cacheEngine.getHitCount());
             System.out.println("Cache mis count:" + cacheEngine.getMissCount());
@@ -148,6 +142,60 @@ public class Executor {
             e.printStackTrace();
         } finally {
             cacheEngine.dispose();
+        }
+    }
+
+
+    private static void myServletsTest() throws Exception {
+
+        MyCache<Long, DataSet> cacheEngine = CacheHolder.getMyCache();
+
+        ConfigurationLoader configurationLoader = new ConfigurationLoader();
+        DBService dbServiceHibernate = new DBServiceHibernateImpl(configurationLoader.getConfiguration(), cacheEngine);
+        try {
+            generateUsers(10, dbServiceHibernate);
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            cacheEngine.dispose();
+        }
+
+
+        ResourceHandler resourceHandler = new ResourceHandler();
+        resourceHandler.setResourceBase(PUBLIC_HTML);
+
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+
+        context.addServlet(AdminServlet.class, "/admin");
+        context.addServlet(LoginServlet.class, "/login");
+
+        org.eclipse.jetty.server.Server server = new org.eclipse.jetty.server.Server(8090);
+        server.setHandler(new HandlerList(resourceHandler, context));
+
+        server.start();
+        server.join();
+    }
+
+    private static void generateUsers(int countUsers, DBService dbServiceHibernate) throws SQLException {
+        for (int i = 0; i < countUsers; i++) {
+            PhoneDataSet phone1 = new PhoneDataSet("11111111111");
+            PhoneDataSet phone2 = new PhoneDataSet("22222222222");
+            UserDataSet user = new UserDataSet(
+                    "User" + i,
+                    i,
+                    new AddressDataSet("street"),
+                    Sets.newHashSet(phone1, phone2)
+            );
+            phone1.setUser(user);
+            phone2.setUser(user);
+            dbServiceHibernate.save(user);
+        }
+
+        for (int i = 0; i < countUsers; i++) {
+            Random random = new Random();
+            int index = random.nextInt(countUsers) + 1;
+            UserDataSet load = dbServiceHibernate.load(index, UserDataSet.class);
+            System.out.println("id = " + index + " Data = " + load);
         }
     }
 }
