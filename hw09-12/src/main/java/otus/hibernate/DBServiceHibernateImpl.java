@@ -3,7 +3,7 @@ package otus.hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
-import otus.cache.MyCache;
+import otus.cache.CacheEngine;
 import otus.common.DBService;
 import otus.data.DataSet;
 import otus.cache.MyElement;
@@ -11,13 +11,13 @@ import otus.cache.MyElement;
 public class DBServiceHibernateImpl implements DBService {
 
     private final SessionFactory sessionFactory;
-    private MyCache<Long, DataSet> myCacheBuilder;
+    private CacheEngine<Long, DataSet> cacheEngineBuilder;
 
-    public DBServiceHibernateImpl(Configuration configuration, MyCache<Long, DataSet> cacheBuilder) {
+    public DBServiceHibernateImpl(Configuration configuration, CacheEngine<Long, DataSet> cacheBuilder) {
 
         sessionFactory = configuration.buildSessionFactory();
         if (cacheBuilder != null) {
-            myCacheBuilder = cacheBuilder;
+            cacheEngineBuilder = cacheBuilder;
         }
     }
 
@@ -33,7 +33,7 @@ public class DBServiceHibernateImpl implements DBService {
     @Override
     public <T extends DataSet> T load(long id, Class<T> clazz) {
         T dataSet;
-        MyElement myElement = myCacheBuilder.get(id);
+        MyElement myElement = cacheEngineBuilder.get(id);
         if (myElement != null && myElement.getValue() != null) {
             dataSet = (T) myElement.getValue();
         }
@@ -57,7 +57,7 @@ public class DBServiceHibernateImpl implements DBService {
 
     private void saveInCache(Long id, DataSet object) {
         MyElement<Long, DataSet> myElement = new MyElement<>(id, object);
-        myCacheBuilder.put(myElement);
+        cacheEngineBuilder.put(myElement);
     }
 }
 

@@ -4,7 +4,7 @@ import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.function.Function;
 
-public class CacheEngineImpl<K, V> implements MyCache<K, V> {
+public class CacheEngineImpl<K, V> implements CacheEngine<K, V> {
     private static final int TIME_THRESHOLD_MS = 5;
 
     private CacheConfig cacheConfig;

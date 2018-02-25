@@ -1,6 +1,6 @@
 package otus.cache;
 
-public interface MyCache <K, V> {
+public interface CacheEngine<K, V> {
 
     void put(MyElement<K, V> element);
 
