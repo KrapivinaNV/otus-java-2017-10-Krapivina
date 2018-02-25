@@ -1,0 +1,31 @@
+<web-app>
+    <display-name>Webapp</display-name>
+
+    <listener>
+        <listener-class>
+            otus.SpringApplicationContextListener
+        </listener-class>
+    </listener>
+
+    <welcome-file-list>
+        <welcome-file>public_html</welcome-file>
+    </welcome-file-list>
+
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>otus.jetty.LoginServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AdminServlet</servlet-name>
+        <servlet-class>otus.jetty.AdminServlet</servlet-class>
+    </servlet>
+
+     <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/login</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminServlet</servlet-name>
+        <url-pattern>/admin</url-pattern>
+    </servlet-mapping>
+</web-app>
