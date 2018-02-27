@@ -4,66 +4,63 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class MultithreadedSorting {
-    private int COUNT_ELEMENTS;
-    private List<List<Integer>> sortedParts = Collections.synchronizedList(new ArrayList<List<Integer>>());
+
+    private List<List<Integer>> sortedParts = new ArrayList();
     private List<Integer> result = new ArrayList<>();
 
     public Integer[] multithreadedSorting(Integer[] inputArray, int countThreads) {
 
-        COUNT_ELEMENTS = inputArray.length;
+        int countElements = inputArray.length;
 
-        if(COUNT_ELEMENTS == 0){
+        if (countElements == 0) {
             return new Integer[]{};
         }
 
-
-        int countPartitions = (int) Math.ceil((float) COUNT_ELEMENTS / countThreads);
+        int countPartitions = (int) Math.ceil((float) countElements / countThreads);
         System.out.println("Count partitions = " + countPartitions);
         Iterable<List<Integer>> partition = Iterables.partition(Lists.newArrayList(inputArray), countPartitions);
         List<List<Integer>> listPartitions = Lists.newArrayList((Iterable) partition);
 
         Thread[] threads = new Thread[countThreads];
 
-
         int neededThreads = Math.min(listPartitions.size(), countThreads);
 
+        ExecutorService executor = Executors.newFixedThreadPool(neededThreads);
 
-        for (int index = 0; index < neededThreads; index++) {
-            int threadIndex = index;
-            Thread thread = new Thread() {
-                public void run() {
-                    System.out.println("Thread " + (threadIndex + 1) + " Running");
-                    List<Integer> part = Lists.newArrayList(listPartitions.get(threadIndex));
-                    part.sort(Comparator.comparingInt(o -> o));
-                    sortedParts.add(part);
-                    System.out.printf("Thread %d%s%n", threadIndex + 1, part.toString());
-                }
-            };
-            thread.setName("Thread " + (threadIndex + 1));
-            threads[threadIndex] = thread;
+        List<Future<List<Integer>>> futures = new ArrayList<>();
+        for (int taskIndex = 0; taskIndex < neededThreads; taskIndex++) {
+            int finalTaskIndex = taskIndex;
+            futures.add(
+                    executor.submit(
+                            () -> {
+                                List<Integer> part = Lists.newArrayList(listPartitions.get(finalTaskIndex));
+                                part.sort(Comparator.comparingInt(o -> o));
+                                return part;
+                            }
+                    )
+            );
         }
 
-        for (int index = 0; index < neededThreads; index++) {
-            threads[index].start();
-        }
-
-        for (int index = 0; index < neededThreads; index++) {
+        futures.forEach(listFuture -> {
             try {
-                threads[index].join();
-            } catch (InterruptedException e) {
+                sortedParts.add(listFuture.get());
+            } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
-        }
+        });
+        executor.shutdown();
 
         if(sortedParts.size() != 0) {
             merge(sortedParts);
         }
-
         Integer[] arr = new Integer[result.size()];
         arr = result.toArray(arr);
         return arr;
@@ -111,4 +108,3 @@ public class MultithreadedSorting {
         return resultList;
     }
 }
-

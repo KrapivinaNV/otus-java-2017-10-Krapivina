@@ -11,9 +11,8 @@ import java.util.Random;
 public class Executor {
 
     private static final Random RANDOM = new Random();
-    private static final int COUNT_ELEMENTS = 11;
+    private static final int COUNT_ELEMENTS = 1100;
     private static final int COUNT_THREADS = 2;
-
 
     public static void main(String[] args) {
 
@@ -27,6 +26,6 @@ public class Executor {
         MultithreadedSorting multithreadedSorting = new MultithreadedSorting();
         Integer[] result = multithreadedSorting.multithreadedSorting(inputArray, COUNT_THREADS);
 
-        System.out.println("Input = " + Arrays.toString(result));
+        System.out.println("Output = " + Arrays.toString(result));
     }
 }
