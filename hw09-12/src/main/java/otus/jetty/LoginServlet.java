@@ -2,13 +2,16 @@ package otus.jetty;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import org.h2.tools.Server;
 import org.springframework.context.ApplicationContext;
 import otus.cache.CacheEngine;
-import otus.common.DBService;
 import otus.data.AddressDataSet;
 import otus.data.DataSet;
 import otus.data.PhoneDataSet;
 import otus.data.UserDataSet;
+import otus.messageSystem.MessageSystem;
+import otus.service.DBService;
+import otus.service.frontend.FrontendService;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -28,22 +31,33 @@ public class LoginServlet extends HttpServlet {
     private CacheEngine<Long, DataSet> cacheEngine;
     private DBService dbService;
 
+    private MessageSystem messageSystem;
+    private FrontendService frontendService;
+
+
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        System.out.println("servlet initialization...");
+        try {
+            Server.createWebServer().start();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         ApplicationContext applicationContext = (ApplicationContext) config.getServletContext()
                 .getAttribute("applicationContext");
         cacheEngine = applicationContext.getBean(CacheEngine.class);
+
+
+        messageSystem = applicationContext.getBean(MessageSystem.class);
+        frontendService = applicationContext.getBean(FrontendService.class);
         dbService = applicationContext.getBean(DBService.class);
 
-        try {
-            generateUsers(10, dbService);
-        } catch (Exception e){
-            e.printStackTrace();
-        } finally {
-            cacheEngine.dispose();
-        }
+        messageSystem.start();
+
+
+
     }
 
     @Override
@@ -60,24 +74,27 @@ public class LoginServlet extends HttpServlet {
 
         String requestLogin = request.getParameter("login");
         String requestPassword = request.getParameter("password");
+//
+        //for test
+        frontendService.handleRequest(requestLogin, 29, "street 1", "8(904)3334433");
 
-        Map<String, Object> pageVariables = new HashMap<>();
-
-        if (requestLogin != null
-                && requestPassword != null
-                && requestLogin.equals("sa")
-                && requestPassword.equals("sa")) {
-            setOkRedirect(response);
-            response.addCookie(new Cookie("authenticated", "true"));
-            response.sendRedirect("/admin");
-
-        } else {
-            response.addCookie(new Cookie("authenticated", "false"));
-            pageVariables.put("login", requestLogin == null ? "" : requestLogin);
-            String page = getPage(pageVariables, LOGIN_PAGE_TEMPLATE);
-            response.getWriter().println(page);
-            setUnauthorized(response);
-        }
+//        Map<String, Object> pageVariables = new HashMap<>();
+//
+//        if (requestLogin != null
+//                && requestPassword != null
+//                && requestLogin.equals("sa")
+//                && requestPassword.equals("sa")) {
+//            setOkRedirect(response);
+//            response.addCookie(new Cookie("authenticated", "true"));
+//            response.sendRedirect("/admin");
+//
+//        } else {
+//            response.addCookie(new Cookie("authenticated", "false"));
+//            pageVariables.put("login", requestLogin == null ? "" : requestLogin);
+//            String page = getPage(pageVariables, LOGIN_PAGE_TEMPLATE);
+//            response.getWriter().println(page);
+//            setUnauthorized(response);
+//        }
     }
 
     private void setOkRedirect(HttpServletResponse response) {

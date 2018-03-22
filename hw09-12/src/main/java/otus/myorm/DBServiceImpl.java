@@ -1,6 +1,8 @@
 package otus.myorm;
 
-import otus.common.DBService;
+import otus.messageSystem.Address;
+import otus.messageSystem.MessageSystem;
+import otus.service.DBService;
 import otus.data.AddressDataSet;
 import otus.data.DataSet;
 import otus.data.PhoneDataSet;
@@ -31,6 +33,16 @@ public class DBServiceImpl implements DBService {
         UsersDAO usersDAO = new UsersDAO(CONNECTION);
         T user = usersDAO.load(id, clazz);
         return user;
+    }
+
+    @Override
+    public Address getAddress() {
+        return null;
+    }
+
+    @Override
+    public MessageSystem getMS() {
+        return null;
     }
 
     @Override

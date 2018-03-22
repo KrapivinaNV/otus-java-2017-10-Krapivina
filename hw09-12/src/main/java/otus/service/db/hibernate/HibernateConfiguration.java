@@ -1,4 +1,4 @@
-package otus.hibernate;
+package otus.service.db.hibernate;
 
 import org.hibernate.cfg.Configuration;
 import org.springframework.context.annotation.Bean;
