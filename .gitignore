@@ -17,7 +17,9 @@
 *.zip
 *.tar.gz
 *.rar
-/hw01/target/
+/hw*/target/
+/dumps/
+/hw04/dumps/
 
 # intellij files
 *.iml

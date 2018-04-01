@@ -40,6 +40,11 @@
         <reflections.version>0.9.11</reflections.version>
         <spring-core.version>4.3.10.RELEASE</spring-core.version>
         <javax.version>4.0.0</javax.version>
+        <jetty-websocket.version>8.2.0.v20160908</jetty-websocket.version>
+        <jetty-util.version>9.4.9.v20180320</jetty-util.version>
+        <jetty-io.version>9.4.9.v20180320</jetty-io.version>
+        <jetty-http.version>9.4.9.v20180320</jetty-http.version>
+        <jetty-continuation.version>9.4.9.v20180320</jetty-continuation.version>
     </properties>
 
     <dependencyManagement>
@@ -114,6 +119,26 @@
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
                 <version>${javax.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-websocket</artifactId>
+                <version>${jetty-websocket.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-util</artifactId>
+                <version>${jetty-util.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-io</artifactId>
+                <version>${jetty-io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-http</artifactId>
+                <version>${jetty-http.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

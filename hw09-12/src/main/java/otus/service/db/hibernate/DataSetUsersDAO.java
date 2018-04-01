@@ -1,4 +1,4 @@
-package otus.hibernate;
+package otus.service.db.hibernate;
 
 import org.hibernate.Session;
 import otus.data.DataSet;
