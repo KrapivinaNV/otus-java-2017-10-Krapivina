@@ -1,24 +1,49 @@
-package otus.hibernate;
+package otus.service.db.hibernate;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import otus.cache.CacheEngine;
-import otus.common.DBService;
-import otus.data.DataSet;
 import otus.cache.MyElement;
+import otus.data.DataSet;
+import otus.messageSystem.Address;
+import otus.messageSystem.Message;
+import otus.messageSystem.MessageSystem;
+import otus.messageSystem.MessageSystemContext;
+import otus.service.DBService;
 
 public class DBServiceHibernateImpl implements DBService {
 
     private final SessionFactory sessionFactory;
     private CacheEngine<Long, DataSet> cacheEngineBuilder;
 
-    public DBServiceHibernateImpl(Configuration configuration, CacheEngine<Long, DataSet> cacheBuilder) {
+    private final Address address;
+    private final MessageSystemContext context;
+
+    public DBServiceHibernateImpl(Configuration configuration, CacheEngine<Long, DataSet> cacheBuilder, Address address, MessageSystemContext context) {
 
         sessionFactory = configuration.buildSessionFactory();
         if (cacheBuilder != null) {
             cacheEngineBuilder = cacheBuilder;
         }
+
+        this.address = address;
+        this.context = context;
+        init();
+    }
+
+    public void init() {
+        context.getMessageSystem().addAddressee(this);
+    }
+
+    @Override
+    public Address getAddress() {
+        return address;
+    }
+
+    @Override
+    public MessageSystem getMS() {
+        return context.getMessageSystem();
     }
 
     @Override
@@ -47,7 +72,6 @@ public class DBServiceHibernateImpl implements DBService {
         return dataSet;
     }
 
-
     @Override
     public void shutdown() {
         if (sessionFactory != null && !sessionFactory.isClosed()) {
@@ -55,9 +79,21 @@ public class DBServiceHibernateImpl implements DBService {
         }
     }
 
+    @Override
+    public void getCacheParams() {
+        Message message = new GetCacheParamsResultMsg(
+                getAddress(),
+                context.getFrontAddress(),
+                cacheEngineBuilder.getHitCount(),
+                cacheEngineBuilder.getMissCount(),
+                cacheEngineBuilder.getGCMissCount()
+        );
+
+        context.getMessageSystem().sendMessage(message);
+    }
+
     private void saveInCache(Long id, DataSet object) {
         MyElement<Long, DataSet> myElement = new MyElement<>(id, object);
         cacheEngineBuilder.put(myElement);
     }
 }
-
