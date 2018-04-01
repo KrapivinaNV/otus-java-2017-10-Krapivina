@@ -1,25 +1,25 @@
 package otus.service.frontend;
 
-import otus.service.msg.AddUserMsg;
 import otus.messageSystem.Address;
 import otus.messageSystem.Message;
 import otus.messageSystem.MessageSystem;
 import otus.messageSystem.MessageSystemContext;
+import otus.service.msg.CacheParams;
+import otus.service.msg.GetCacheParamsMsg;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class FrontendServiceImpl implements FrontendService {
 
     private final Address address;
     private final MessageSystemContext context;
 
-    private final Map<Integer, String> users = new HashMap<>();
+    private volatile CacheParams cacheParams;
 
-    public FrontendServiceImpl(MessageSystemContext context, Address address) {
+    FrontendServiceImpl(MessageSystemContext context, Address address) {
         this.context = context;
         this.address = address;
-
         init();
     }
 
@@ -29,21 +29,36 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
+    public void setCacheParams(CacheParams cacheParams) {
+        this.cacheParams = cacheParams;
+        System.out.println("FrontendService:: cache params received:: " + cacheParams);
+    }
+
+    @Override
+    public Future<CacheParams> getCacheParams() {
+        return Executors.newSingleThreadExecutor().submit(
+                () -> {
+                    while (cacheParams == null) {
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    return cacheParams;
+                }
+        );
+    }
+
+    @Override
     public Address getAddress() {
         return address;
     }
 
-
     @Override
-    public void handleRequest(String name, Number age, String address, String numberPhone) {
-        Message message = new AddUserMsg(getAddress(), context.getDbAddress(), name, age, address, numberPhone);
-        context.getMessageSystem().sendMessage(message);
-
-    }
-
-    @Override
-    public void addUser(int id, String name) {
-
+    public void sendCacheParamsRequest() {
+        Message getCacheParamsMsg = new GetCacheParamsMsg(getAddress(), context.getDbAddress());
+        context.getMessageSystem().sendMessage(getCacheParamsMsg);
     }
 
     @Override

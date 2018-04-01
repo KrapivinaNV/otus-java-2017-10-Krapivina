@@ -20,12 +20,25 @@
         <servlet-class>otus.jetty.AdminServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>MyWebSocketServlet</servlet-name>
+        <servlet-class>otus.service.websocket.MyWebSocketServlet</servlet-class>
+    </servlet>
+
      <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/login</url-pattern>
     </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>AdminServlet</servlet-name>
         <url-pattern>/admin</url-pattern>
     </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>MyWebSocketServlet</servlet-name>
+        <url-pattern>/my-web-socket-servlet</url-pattern>
+    </servlet-mapping>
+
+
 </web-app>

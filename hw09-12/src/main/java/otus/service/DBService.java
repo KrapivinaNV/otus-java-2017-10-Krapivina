@@ -14,5 +14,11 @@ public interface DBService extends Addressee {
     Address getAddress();
     MessageSystem getMS();
 
-    void shutdown();
+    void init();
+
+    default void shutdown() {
+    }
+
+    default void getCacheParams() {
+    }
 }

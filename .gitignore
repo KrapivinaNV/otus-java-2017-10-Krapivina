@@ -18,6 +18,7 @@
 *.tar.gz
 *.rar
 /hw01/target/
+/hw09-12/target/
 
 # intellij files
 *.iml

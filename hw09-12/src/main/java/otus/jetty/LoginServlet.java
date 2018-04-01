@@ -55,9 +55,6 @@ public class LoginServlet extends HttpServlet {
         dbService = applicationContext.getBean(DBService.class);
 
         messageSystem.start();
-
-
-
     }
 
     @Override
@@ -74,27 +71,24 @@ public class LoginServlet extends HttpServlet {
 
         String requestLogin = request.getParameter("login");
         String requestPassword = request.getParameter("password");
-//
-        //for test
-        frontendService.handleRequest(requestLogin, 29, "street 1", "8(904)3334433");
 
-//        Map<String, Object> pageVariables = new HashMap<>();
-//
-//        if (requestLogin != null
-//                && requestPassword != null
-//                && requestLogin.equals("sa")
-//                && requestPassword.equals("sa")) {
-//            setOkRedirect(response);
-//            response.addCookie(new Cookie("authenticated", "true"));
-//            response.sendRedirect("/admin");
-//
-//        } else {
-//            response.addCookie(new Cookie("authenticated", "false"));
-//            pageVariables.put("login", requestLogin == null ? "" : requestLogin);
-//            String page = getPage(pageVariables, LOGIN_PAGE_TEMPLATE);
-//            response.getWriter().println(page);
-//            setUnauthorized(response);
-//        }
+        Map<String, Object> pageVariables = new HashMap<>();
+
+        if (requestLogin != null
+                && requestPassword != null
+                && requestLogin.equals("sa")
+                && requestPassword.equals("sa")) {
+            setOkRedirect(response);
+            response.addCookie(new Cookie("authenticated", "true"));
+            response.sendRedirect("/admin");
+
+        } else {
+            response.addCookie(new Cookie("authenticated", "false"));
+            pageVariables.put("login", requestLogin == null ? "" : requestLogin);
+            String page = getPage(pageVariables, LOGIN_PAGE_TEMPLATE);
+            response.getWriter().println(page);
+            setUnauthorized(response);
+        }
     }
 
     private void setOkRedirect(HttpServletResponse response) {

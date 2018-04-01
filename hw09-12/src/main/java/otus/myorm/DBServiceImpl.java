@@ -2,6 +2,7 @@ package otus.myorm;
 
 import otus.messageSystem.Address;
 import otus.messageSystem.MessageSystem;
+import otus.messageSystem.MessageSystemContext;
 import otus.service.DBService;
 import otus.data.AddressDataSet;
 import otus.data.DataSet;
@@ -11,15 +12,33 @@ import otus.data.UserDataSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * @deprecated
+ * hand-made ORM implementation
+ */
+@Deprecated
 public class DBServiceImpl implements DBService {
 
     private final Connection CONNECTION = ConnectionHelper.getConnection();
 
-    public DBServiceImpl() throws SQLException {
+    private final Address address;
+    private final MessageSystemContext context;
+
+    public DBServiceImpl(Address address, MessageSystemContext context) throws SQLException {
+        this.address = address;
+        this.context = context;
+
         UsersDAO usersDAO = new UsersDAO(CONNECTION);
         usersDAO.prepareTables(AddressDataSet.class);
         usersDAO.prepareTables(UserDataSet.class);
         usersDAO.prepareTables(PhoneDataSet.class);
+
+        init();
+    }
+
+    @Override
+    public void init() {
+        context.getMessageSystem().addAddressee(this);
     }
 
     @Override
@@ -37,16 +56,11 @@ public class DBServiceImpl implements DBService {
 
     @Override
     public Address getAddress() {
-        return null;
+        return address;
     }
 
     @Override
     public MessageSystem getMS() {
-        return null;
-    }
-
-    @Override
-    public void shutdown() {
-
+        return context.getMessageSystem();
     }
 }

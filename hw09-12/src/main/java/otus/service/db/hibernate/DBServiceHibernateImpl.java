@@ -7,6 +7,7 @@ import otus.cache.CacheEngine;
 import otus.cache.MyElement;
 import otus.data.DataSet;
 import otus.messageSystem.Address;
+import otus.messageSystem.Message;
 import otus.messageSystem.MessageSystem;
 import otus.messageSystem.MessageSystemContext;
 import otus.service.DBService;
@@ -71,7 +72,6 @@ public class DBServiceHibernateImpl implements DBService {
         return dataSet;
     }
 
-
     @Override
     public void shutdown() {
         if (sessionFactory != null && !sessionFactory.isClosed()) {
@@ -79,9 +79,21 @@ public class DBServiceHibernateImpl implements DBService {
         }
     }
 
+    @Override
+    public void getCacheParams() {
+        Message message = new GetCacheParamsResultMsg(
+                getAddress(),
+                context.getFrontAddress(),
+                cacheEngineBuilder.getHitCount(),
+                cacheEngineBuilder.getMissCount(),
+                cacheEngineBuilder.getGCMissCount()
+        );
+
+        context.getMessageSystem().sendMessage(message);
+    }
+
     private void saveInCache(Long id, DataSet object) {
         MyElement<Long, DataSet> myElement = new MyElement<>(id, object);
         cacheEngineBuilder.put(myElement);
     }
 }
-

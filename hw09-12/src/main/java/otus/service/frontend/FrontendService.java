@@ -1,12 +1,17 @@
 package otus.service.frontend;
 
 import otus.messageSystem.Addressee;
+import otus.service.msg.CacheParams;
+
+import java.util.concurrent.Future;
 
 public interface FrontendService extends Addressee {
+
     void init();
 
-    void addUser(int id, String name);
+    void setCacheParams(CacheParams cacheParams);
 
-    void handleRequest(String name, Number age, String address, String numberPhone);
+    Future<CacheParams> getCacheParams();
 
+    void sendCacheParamsRequest();
 }
